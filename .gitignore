@@ -1,0 +1,22 @@
+node_modules/
+dist/
+.astro/
+.env
+.env.*
+!.env.example
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# Réglages Claude Code locaux (les réglages partagés vont dans .claude/settings.json)
+.claude/settings.local.json
+
+# OS / éditeurs
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/

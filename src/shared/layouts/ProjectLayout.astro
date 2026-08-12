@@ -1,0 +1,110 @@
+---
+import BaseLayout from '@/shared/layouts/BaseLayout.astro';
+import type { Project } from '@/shared/project';
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+---
+
+<BaseLayout
+  title={project.title}
+  description={project.blurb}
+  image={project.cover}
+  accent={project.accent}
+>
+  <a class="skip" href="#jeu">Aller au contenu</a>
+
+  <header class="chrome">
+    <a class="back" href="/">
+      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none">
+        <path
+          d="M10 3.5 5.5 8l4.5 4.5"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"></path>
+      </svg>
+      Tous les projets
+    </a>
+    {project.status === 'draft' && <span class="badge">brouillon</span>}
+    {project.status === 'archived' && <span class="badge archived">archivé</span>}
+  </header>
+
+  {
+    project.needsPointer && (
+      <p class="pointer-note" role="note">
+        Ce projet est pensé pour un écran large avec souris ou clavier.
+      </p>
+    )
+  }
+
+  <main id="jeu">
+    <slot />
+  </main>
+</BaseLayout>
+
+<style>
+  .skip {
+    position: absolute;
+    left: -9999px;
+  }
+  .skip:focus {
+    left: var(--space-4);
+    top: var(--space-4);
+    z-index: 100;
+    padding: var(--space-2) var(--space-4);
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+  }
+
+  .chrome {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition);
+  }
+  .back:hover {
+    color: var(--text);
+  }
+
+  .badge {
+    padding: 2px var(--space-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+  .badge.archived {
+    opacity: 0.7;
+  }
+
+  .pointer-note {
+    margin: 0 var(--space-6) var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+  @media (min-width: 900px) {
+    .pointer-note {
+      display: none;
+    }
+  }
+</style>

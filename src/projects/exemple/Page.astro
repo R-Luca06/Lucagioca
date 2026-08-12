@@ -1,0 +1,22 @@
+---
+/**
+ * Le point d'entrée du projet. Astro le charge via `src/pages/p/[slug].astro`.
+ *
+ * Tu es libre ici : rendu statique, island React, canvas vanilla, mélange des
+ * trois. Rien de ce fichier ne fuit vers les autres projets.
+ */
+import Demo from './Demo';
+import './exemple.css';
+---
+
+<div class="exemple">
+  <h1>Exemple</h1>
+  <p>
+    Ce gabarit démontre le contrat complet : manifeste typé, route générée, CSS local,
+    et une island React hydratée uniquement sur cette page.
+  </p>
+
+  {/* `client:visible` n'hydrate qu'au scroll. Préférer le directive la plus
+      paresseuse qui fonctionne : idle > visible > load. */}
+  <Demo client:visible />
+</div>

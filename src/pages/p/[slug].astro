@@ -1,0 +1,45 @@
+---
+import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
+import { routedProjects } from '@/registry';
+import ProjectLayout from '@/shared/layouts/ProjectLayout.astro';
+import type { Project } from '@/shared/project';
+
+/**
+ * Route unique pour tous les projets.
+ *
+ * Chaque projet fournit un `Page.astro` dans son dossier ; on le charge
+ * dynamiquement ici. Vite code-splitte par page, donc un visiteur ne
+ * télécharge que le JS du projet qu'il ouvre — jamais celui des autres.
+ */
+export function getStaticPaths() {
+  return routedProjects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+
+const pageModules = import.meta.glob<{ default: AstroComponentFactory }>(
+  '../../projects/*/Page.astro',
+);
+const key = `../../projects/${project.slug}/Page.astro`;
+const loader = pageModules[key];
+
+if (!loader) {
+  throw new Error(
+    `[${project.slug}] fichier manquant : src/projects/${project.slug}/Page.astro. ` +
+      'Chaque projet doit exposer un Page.astro à côté de son meta.ts.',
+  );
+}
+
+const { default: Page } = await loader();
+---
+
+<ProjectLayout project={project}>
+  <Page />
+</ProjectLayout>

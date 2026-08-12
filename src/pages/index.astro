@@ -1,0 +1,166 @@
+---
+import { listedProjects } from '@/registry';
+import BaseLayout from '@/shared/layouts/BaseLayout.astro';
+
+const projects = listedProjects;
+
+const dateFormat = new Intl.DateTimeFormat('fr-FR', { month: 'short', year: 'numeric' });
+---
+
+<BaseLayout
+  title="Projets"
+  description="Une collection de petites expériences interactives."
+>
+  <main class="wrap">
+    <header class="intro">
+      <h1>Projets</h1>
+      <p>Une collection de petites expériences interactives.</p>
+    </header>
+
+    {
+      projects.length === 0 ? (
+        <p class="empty">
+          Aucun projet pour l'instant. Crée un dossier dans <code>src/projects/</code> avec un{' '}
+          <code>meta.ts</code> et un <code>Page.astro</code> — il apparaîtra ici tout seul.
+        </p>
+      ) : (
+        <ul class="grid">
+          {projects.map((project) => (
+            <li class="card" style={`--accent: ${project.accent};`}>
+              <a href={`/p/${project.slug}`}>
+                {project.cover ? (
+                  <img class="cover" src={project.cover} alt="" width="480" height="270" loading="lazy" />
+                ) : (
+                  <div class="cover cover--placeholder" aria-hidden="true" />
+                )}
+                <div class="body">
+                  <h2>
+                    {project.title}
+                    {project.status === 'draft' && <span class="draft">brouillon</span>}
+                  </h2>
+                  <p>{project.blurb}</p>
+                  <time datetime={project.publishedAt}>
+                    {dateFormat.format(new Date(`${project.publishedAt}T00:00:00Z`))}
+                  </time>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </main>
+</BaseLayout>
+
+<style>
+  .wrap {
+    max-width: 68rem;
+    margin: 0 auto;
+    padding: var(--space-16) var(--space-6) var(--space-16);
+  }
+
+  .intro h1 {
+    margin: 0 0 var(--space-2);
+    font-size: clamp(2rem, 6vw, 3rem);
+    letter-spacing: -0.02em;
+  }
+  .intro p {
+    margin: 0 0 var(--space-12);
+    color: var(--text-muted);
+    font-size: 1.125rem;
+  }
+
+  .empty {
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+  .empty code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.1em 0.4em;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    gap: var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition:
+      transform var(--transition),
+      box-shadow var(--transition),
+      border-color var(--transition);
+  }
+  .card:hover,
+  .card:focus-within {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-card);
+  }
+
+  .card a {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .cover {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    background: var(--bg);
+  }
+  .cover--placeholder {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent) 22%, var(--surface)),
+      color-mix(in srgb, var(--accent) 6%, var(--surface))
+    );
+  }
+
+  .body {
+    padding: var(--space-4) var(--space-5, 1.25rem) var(--space-5, 1.25rem);
+  }
+  .body h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-1);
+    font-size: 1.0625rem;
+    letter-spacing: -0.01em;
+  }
+  .body p {
+    margin: 0 0 var(--space-3);
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+  }
+  .body time {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .draft {
+    padding: 1px var(--space-2);
+    border: 1px dashed var(--border);
+    border-radius: 999px;
+    font-size: 0.625rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+</style>
