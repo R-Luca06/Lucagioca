@@ -1,0 +1,18 @@
+---
+/**
+ * La carte est passée en slot nommé à l'island : elle est donc rendue par
+ * Astro (HTML pur, aucun JS) puis simplement déplacée par React d'un écran
+ * à l'autre. On garde l'interactivité sans payer la géométrie deux fois.
+ */
+import TonTemps from './TonTemps';
+import WorldMap from './WorldMap.astro';
+import './ton-temps.css';
+---
+
+<div class="ton-temps">
+  {/* `client:idle` : le premier écran est lisible sans JS, l'hydratation
+      peut donc attendre que le navigateur n'ait rien de mieux à faire. */}
+  <TonTemps client:idle>
+    <WorldMap slot="carte" />
+  </TonTemps>
+</div>

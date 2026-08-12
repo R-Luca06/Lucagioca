@@ -1,0 +1,519 @@
+/*
+ * Styles locaux du projet. Toutes les règles vivent sous `.ton-temps` :
+ * rien ici ne peut fuir vers un autre jeu.
+ *
+ * La rampe séquentielle de la carte vient du système de dataviz, validée
+ * pour les deux thèmes (monotonie de clarté, écarts visibles, palier le plus
+ * clair au-dessus de 2:1 sur la surface). Ne pas la retoucher à l'œil.
+ */
+
+.ton-temps {
+  --encre: var(--text);
+  --encre-douce: var(--text-muted);
+  --carton: var(--surface);
+  --trait: var(--border);
+  --bleu: #2a78d6;
+
+  /* Années perdues face au maximum mondial : 0-6, 6-12, 12-18, 18-24, 24-30. */
+  --seq-0: #86b6ef;
+  --seq-1: #3987e5;
+  --seq-2: #256abf;
+  --seq-3: #184f95;
+  --seq-4: #0d366b;
+
+  --terre: #dcd6ca;
+  --terre-vide: #ebe8e2;
+
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 0 var(--space-4) var(--space-16);
+  color: var(--encre);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ton-temps {
+    --seq-0: #184f95;
+    --seq-1: #256abf;
+    --seq-2: #3987e5;
+    --seq-3: #6da7ec;
+    --seq-4: #9ec5f4;
+    --terre: #2b2926;
+    --terre-vide: #232120;
+  }
+}
+
+:root[data-theme="dark"] .ton-temps {
+  --seq-0: #184f95;
+  --seq-1: #256abf;
+  --seq-2: #3987e5;
+  --seq-3: #6da7ec;
+  --seq-4: #9ec5f4;
+  --terre: #2b2926;
+  --terre-vide: #232120;
+}
+
+.ton-temps .ecran {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.ton-temps .titre {
+  margin: var(--space-8) 0 0;
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.ton-temps .intro {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 1.125rem;
+  color: var(--encre-douce);
+}
+
+.ton-temps .section-titre {
+  margin: var(--space-8) 0 0;
+  font-size: 1.375rem;
+  letter-spacing: -0.01em;
+}
+
+.ton-temps .section-note {
+  margin: 0;
+  max-width: 60ch;
+  font-size: 0.9375rem;
+  color: var(--encre-douce);
+}
+
+/* --- La carte -------------------------------------------------------------- */
+
+.ton-temps .carte-boite {
+  margin: var(--space-2) 0;
+  border: 1px solid var(--trait);
+  border-radius: var(--radius-md);
+  background: var(--carton);
+  padding: var(--space-2);
+  overflow: hidden;
+}
+
+.ton-temps .carte {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ton-temps .pays {
+  fill: var(--terre);
+  stroke: var(--carton);
+  stroke-width: 0.6;
+  transition: fill var(--transition);
+}
+
+.ton-temps .pays.sans-donnees {
+  fill: var(--terre-vide);
+}
+
+.ton-temps .carte-boite:not(.revelee) .pays:not(.sans-donnees):hover {
+  fill: color-mix(in srgb, var(--bleu) 45%, var(--terre));
+  cursor: pointer;
+}
+
+/* Le pays choisi reste visible sur les deux écrans. */
+.ton-temps .carte-boite[data-choisi] .pays {
+  opacity: 0.75;
+}
+
+.ton-temps .carte-boite[data-choisi] .pays[data-id] {
+  opacity: 1;
+}
+
+.ton-temps .carte-boite.a-choisi .pays {
+  opacity: 0.55;
+}
+
+.ton-temps .carte-boite.a-choisi .pays:hover {
+  opacity: 1;
+}
+
+/*
+ * La révélation : la carte ne se colore qu'ici. Avant, elle est neutre —
+ * la teindre pendant le choix vendrait la mèche.
+ */
+.ton-temps .carte-boite.revelee .pays[data-bucket="0"] {
+  fill: var(--seq-0);
+}
+.ton-temps .carte-boite.revelee .pays[data-bucket="1"] {
+  fill: var(--seq-1);
+}
+.ton-temps .carte-boite.revelee .pays[data-bucket="2"] {
+  fill: var(--seq-2);
+}
+.ton-temps .carte-boite.revelee .pays[data-bucket="3"] {
+  fill: var(--seq-3);
+}
+.ton-temps .carte-boite.revelee .pays[data-bucket="4"] {
+  fill: var(--seq-4);
+}
+
+.ton-temps .carte-boite.revelee .pays {
+  opacity: 1;
+}
+
+.ton-temps .legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+  color: var(--encre-douce);
+}
+
+.ton-temps .legende li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ton-temps .pastille {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 3px;
+  border: 1px solid var(--trait);
+}
+
+.ton-temps .pastille[data-bucket="0"] {
+  background: var(--seq-0);
+}
+.ton-temps .pastille[data-bucket="1"] {
+  background: var(--seq-1);
+}
+.ton-temps .pastille[data-bucket="2"] {
+  background: var(--seq-2);
+}
+.ton-temps .pastille[data-bucket="3"] {
+  background: var(--seq-3);
+}
+.ton-temps .pastille[data-bucket="4"] {
+  background: var(--seq-4);
+}
+
+/* --- Choix du pays --------------------------------------------------------- */
+
+.ton-temps .choix-barre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--trait);
+  border-radius: var(--radius-md);
+  background: var(--carton);
+}
+
+.ton-temps .choix-label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: 0.8125rem;
+  color: var(--encre-douce);
+}
+
+.ton-temps .choix-label select {
+  min-width: 14rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--trait);
+  border-radius: var(--radius-sm);
+  background: var(--carton);
+  color: var(--encre);
+  font: inherit;
+  font-size: 1rem;
+}
+
+.ton-temps .choix-resume {
+  flex: 1 1 16rem;
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.ton-temps .choix-resume.muet {
+  color: var(--encre-douce);
+}
+
+/* --- Le compteur ----------------------------------------------------------- */
+
+.ton-temps .compteur {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  border: 1px solid var(--trait);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--carton) 92%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.ton-temps .compteur-chiffre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.ton-temps .compteur-valeur {
+  font-size: clamp(2rem, 7vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ton-temps .compteur-unite {
+  font-size: 1rem;
+  color: var(--encre-douce);
+}
+
+.ton-temps .compteur-pays {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--encre-douce);
+}
+
+.ton-temps .compteur-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.ton-temps .jauge {
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--encre) 10%, transparent);
+  overflow: hidden;
+}
+
+.ton-temps .jauge-remplie {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--bleu);
+  transition: width var(--transition);
+}
+
+/* --- Cartes d'activité ------------------------------------------------------ */
+
+.ton-temps .grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ton-temps .carte-activite {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--trait);
+  border-radius: var(--radius-md);
+  background: var(--carton);
+  transition: border-color var(--transition);
+}
+
+.ton-temps .carte-activite.prise {
+  border-color: var(--bleu);
+  box-shadow: inset 3px 0 0 var(--bleu);
+}
+
+.ton-temps .etiquette {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.ton-temps .emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.ton-temps .activite-titre {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.ton-temps .activite-detail {
+  margin: var(--space-1) 0 0;
+  font-size: 0.875rem;
+  color: var(--encre-douce);
+}
+
+.ton-temps .activite-cout {
+  margin: var(--space-2) 0 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ton-temps .activite-part {
+  font-weight: 400;
+  color: var(--encre-douce);
+}
+
+.ton-temps .activite-source {
+  margin: var(--space-1) 0 0;
+  font-size: 0.75rem;
+  color: var(--encre-douce);
+  opacity: 0.8;
+}
+
+.ton-temps .quantite {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.ton-temps .quantite-valeur {
+  min-width: 3ch;
+  text-align: center;
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Boutons ---------------------------------------------------------------- */
+
+.ton-temps .bouton {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--trait);
+  border-radius: var(--radius-sm);
+  background: var(--carton);
+  color: var(--encre);
+  font: inherit;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    border-color var(--transition);
+}
+
+.ton-temps .bouton:hover:not(:disabled) {
+  border-color: var(--bleu);
+}
+
+.ton-temps .bouton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ton-temps .bouton.primaire {
+  background: var(--bleu);
+  border-color: var(--bleu);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.ton-temps .bouton.primaire:hover:not(:disabled) {
+  background: #1c5cab;
+}
+
+.ton-temps .bouton.rond {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border-radius: 999px;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+/* --- Bilan ------------------------------------------------------------------ */
+
+.ton-temps .reparti {
+  display: grid;
+  gap: var(--space-4);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ton-temps .part {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.ton-temps .part-tete {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ton-temps .part-pourcent {
+  font-size: 0.8125rem;
+  color: var(--encre-douce);
+}
+
+.ton-temps .chute {
+  margin-top: var(--space-8);
+  padding: var(--space-6);
+  border: 1px solid var(--trait);
+  border-radius: var(--radius-lg);
+  background: var(--carton);
+}
+
+.ton-temps .chute.sombre {
+  border-color: color-mix(in srgb, var(--bleu) 40%, var(--trait));
+  background: color-mix(in srgb, var(--bleu) 7%, var(--carton));
+}
+
+.ton-temps .chute-titre {
+  margin: 0 0 var(--space-3);
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+}
+
+.ton-temps .chute-titre em {
+  font-style: normal;
+  color: var(--bleu);
+}
+
+.ton-temps .chute p {
+  margin: 0 0 var(--space-3);
+  max-width: 60ch;
+}
+
+.ton-temps .chute-liste-intro {
+  color: var(--encre-douce);
+  font-size: 0.9375rem;
+}
+
+.ton-temps .chute-liste {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ton-temps .chute-liste li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--encre) 5%, transparent);
+  font-size: 0.9375rem;
+}
+
+@media (max-width: 40rem) {
+  .ton-temps .compteur {
+    position: static;
+  }
+}
