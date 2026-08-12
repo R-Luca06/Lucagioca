@@ -1,55 +1,107 @@
 /*
- * Styles locaux du projet. Toutes les règles vivent sous `.ton-temps` :
- * rien ici ne peut fuir vers un autre jeu.
+ * Ton temps — « compteur mécanique ».
  *
- * La rampe séquentielle de la carte vient du système de dataviz, validée
- * pour les deux thèmes (monotonie de clarté, écarts visibles, palier le plus
- * clair au-dessus de 2:1 sur la surface). Ne pas la retoucher à l'œil.
+ * Une machine qui décompte une vie : monospace intégral, phosphore ambre sur
+ * presque-noir, filets de tableau, capitales. Le projet assume un seul mode
+ * (sombre) : c'est une identité, pas un oubli — CLAUDE.md autorise
+ * explicitement une identité radicalement différente par projet.
+ *
+ * Les deux rampes de la carte sortent du système de dataviz et ont été
+ * validées contre CETTE surface (`--panneau`) en mode `--ordinal` : clarté
+ * monotone, écart ≥ 0,06 entre paliers voisins, palier le plus sombre
+ * au-dessus de 2:1. Ne pas les retoucher à l'œil — relancer le validateur.
  */
 
+/*
+ * Le seul sélecteur du fichier qui sorte de `.ton-temps`, et la seule entorse
+ * à la règle 5 de CLAUDE.md.
+ *
+ * Il ne peut pourtant pas fuir : `:has()` le limite aux pages qui contiennent
+ * ce projet. C'est le prix d'un fond plein écran, puisque le fond de page et
+ * le chrome (lien de retour, badges) appartiennent au layout partagé — les
+ * repeindre depuis `.ton-temps` seul est impossible.
+ */
+body:has(.ton-temps) {
+  color-scheme: dark;
+
+  --bg: #0a0b09;
+  --surface: #141410;
+  --border: #2e2c24;
+  --text: #f0e2c8;
+  --text-muted: #8f8571;
+  --accent: #ffb000;
+}
+
+/*
+ * `swap` : le texte s'affiche tout de suite dans la police de repli, puis
+ * bascule. Retenir un compteur le temps de charger une police serait pire
+ * que le petit saut de rendu.
+ */
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("./assets/ibm-plex-mono-latin-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("./assets/ibm-plex-mono-latin-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 .ton-temps {
-  --encre: var(--text);
-  --encre-douce: var(--text-muted);
-  --carton: var(--surface);
-  --trait: var(--border);
-  --bleu: #2a78d6;
+  --nuit: #0a0b09;
+  --panneau: #141410;
+  --filet: #2e2c24;
+  --phosphore: #f0e2c8;
+  --phosphore-faible: #8f8571;
+  --ambre: #ffb000;
+  --rouge: #ff8a72;
 
-  /* Années perdues face au maximum mondial : 0-6, 6-12, 12-18, 18-24, 24-30. */
-  --seq-0: #86b6ef;
-  --seq-1: #3987e5;
-  --seq-2: #256abf;
-  --seq-3: #184f95;
-  --seq-4: #0d366b;
+  /*
+   * Rampe douce — écran de choix. La carte doit vivre sans rien éventer, donc
+   * le palier le plus sombre reste au-dessus de 2:1 sur la surface (2,29:1).
+   */
+  --vie-0: #6b4a00;
+  --vie-1: #966800;
+  --vie-2: #c28800;
+  --vie-3: #e0a41a;
+  --vie-4: #ffc247;
 
-  --terre: #dcd6ca;
-  --terre-vide: #ebe8e2;
+  /*
+   * Rampe brutale — dernier écran. Même variable, même partition, mais le bas
+   * plonge dans le noir (1,06:1 sur la surface) et le haut monte à l'or vif.
+   *
+   * C'est une entorse DÉLIBÉRÉE au plancher de 2:1, et elle est permise ici :
+   * le plancher vaut pour une échelle ordinale (des paliers qu'on doit tous
+   * distinguer), pas pour un encodage séquentiel de magnitude, où le palier le
+   * plus faible a le droit de se fondre dans le fond. C'est même tout le
+   * propos — une vie de 54 ans y disparaît. Le relais de lecture est double :
+   * la légende, et la bulle au survol qui donne la valeur exacte. Les
+   * frontières passent en trait clair pour que les pays noirs gardent une
+   * forme lisible.
+   */
+  --finale-0: #0f0b02;
+  --finale-1: #4a3305;
+  --finale-2: #96690a;
+  --finale-3: #d29c14;
+  --finale-4: #ffd75e;
 
-  max-width: 68rem;
+  --terre: #24241d;
+  --terre-vide: #191913;
+
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Code", Menlo, monospace;
+
+  max-width: 74rem;
   margin: 0 auto;
   padding: 0 var(--space-4) var(--space-16);
-  color: var(--encre);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .ton-temps {
-    --seq-0: #184f95;
-    --seq-1: #256abf;
-    --seq-2: #3987e5;
-    --seq-3: #6da7ec;
-    --seq-4: #9ec5f4;
-    --terre: #2b2926;
-    --terre-vide: #232120;
-  }
-}
-
-:root[data-theme="dark"] .ton-temps {
-  --seq-0: #184f95;
-  --seq-1: #256abf;
-  --seq-2: #3987e5;
-  --seq-3: #6da7ec;
-  --seq-4: #9ec5f4;
-  --terre: #2b2926;
-  --terre-vide: #232120;
+  color: var(--phosphore);
+  font-family: var(--mono);
+  font-size: 0.9375rem;
 }
 
 .ton-temps .ecran {
@@ -58,42 +110,68 @@
   gap: var(--space-4);
 }
 
+/* --- Titres ----------------------------------------------------------------- */
+
 .ton-temps .titre {
-  margin: var(--space-8) 0 0;
-  font-size: clamp(2rem, 6vw, 3.25rem);
-  line-height: 1.05;
-  letter-spacing: -0.02em;
+  margin: var(--space-6) 0 0;
+  font-size: clamp(2.25rem, 8vw, 4.5rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
 }
 
 .ton-temps .intro {
   margin: 0;
-  max-width: 46ch;
-  font-size: 1.125rem;
-  color: var(--encre-douce);
+  max-width: 52ch;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--phosphore-faible);
+}
+
+.ton-temps .intro em {
+  font-style: normal;
+  color: var(--ambre);
 }
 
 .ton-temps .section-titre {
   margin: var(--space-8) 0 0;
-  font-size: 1.375rem;
-  letter-spacing: -0.01em;
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid var(--filet);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ambre);
 }
 
 .ton-temps .section-note {
   margin: 0;
-  max-width: 60ch;
-  font-size: 0.9375rem;
-  color: var(--encre-douce);
+  max-width: 64ch;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--phosphore-faible);
 }
 
 /* --- La carte -------------------------------------------------------------- */
 
+/*
+ * `relative` : la bulle de survol se place dans ce repère.
+ *
+ * `overflow-x: clip` + `overflow-y: visible` : la bulle doit pouvoir sortir
+ * par le haut de la carte, mais jamais par le côté — un débordement latéral
+ * ferait défiler la page entière. `clip` est le seul mode qui autorise l'axe
+ * opposé à rester `visible` ; avec `hidden`, l'axe vertical serait ramené à
+ * `auto` et la bulle se ferait rogner.
+ */
 .ton-temps .carte-boite {
+  position: relative;
   margin: var(--space-2) 0;
-  border: 1px solid var(--trait);
-  border-radius: var(--radius-md);
-  background: var(--carton);
-  padding: var(--space-2);
-  overflow: hidden;
+  border: 1px solid var(--filet);
+  background: var(--panneau);
+  padding: var(--space-3);
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
 .ton-temps .carte {
@@ -104,8 +182,8 @@
 
 .ton-temps .pays {
   fill: var(--terre);
-  stroke: var(--carton);
-  stroke-width: 0.6;
+  stroke: var(--panneau);
+  stroke-width: 0.5;
   transition: fill var(--transition);
 }
 
@@ -113,61 +191,156 @@
   fill: var(--terre-vide);
 }
 
-.ton-temps .carte-boite:not(.revelee) .pays:not(.sans-donnees):hover {
-  fill: color-mix(in srgb, var(--bleu) 45%, var(--terre));
-  cursor: pointer;
+/* Lecture n°1 — écran de choix, rampe douce. */
+.ton-temps .carte-boite.choix .pays[data-vie="0"] {
+  fill: var(--vie-0);
+}
+.ton-temps .carte-boite.choix .pays[data-vie="1"] {
+  fill: var(--vie-1);
+}
+.ton-temps .carte-boite.choix .pays[data-vie="2"] {
+  fill: var(--vie-2);
+}
+.ton-temps .carte-boite.choix .pays[data-vie="3"] {
+  fill: var(--vie-3);
+}
+.ton-temps .carte-boite.choix .pays[data-vie="4"] {
+  fill: var(--vie-4);
 }
 
-/* Le pays choisi reste visible sur les deux écrans. */
+/* Lecture n°2 — dernier écran, même partition, rampe brutale. */
+.ton-temps .carte-boite.finale .pays[data-vie="0"] {
+  fill: var(--finale-0);
+}
+.ton-temps .carte-boite.finale .pays[data-vie="1"] {
+  fill: var(--finale-1);
+}
+.ton-temps .carte-boite.finale .pays[data-vie="2"] {
+  fill: var(--finale-2);
+}
+.ton-temps .carte-boite.finale .pays[data-vie="3"] {
+  fill: var(--finale-3);
+}
+.ton-temps .carte-boite.finale .pays[data-vie="4"] {
+  fill: var(--finale-4);
+}
+
+/* Sans ça, les pays du bas de la rampe se confondraient avec le fond. */
+.ton-temps .carte-boite.finale .pays {
+  stroke: color-mix(in srgb, var(--phosphore) 22%, transparent);
+  stroke-width: 0.4;
+}
+
+.ton-temps .carte-boite .pays:not(.sans-donnees):hover {
+  fill: var(--phosphore);
+  cursor: crosshair;
+}
+
+/* Le pays choisi : tout le reste s'éteint, lui garde son plein éclat. */
+.ton-temps .carte-boite.a-choisi .pays,
 .ton-temps .carte-boite[data-choisi] .pays {
-  opacity: 0.75;
-}
-
-.ton-temps .carte-boite[data-choisi] .pays[data-id] {
-  opacity: 1;
-}
-
-.ton-temps .carte-boite.a-choisi .pays {
-  opacity: 0.55;
+  opacity: 0.4;
 }
 
 .ton-temps .carte-boite.a-choisi .pays:hover {
   opacity: 1;
 }
 
-/*
- * La révélation : la carte ne se colore qu'ici. Avant, elle est neutre —
- * la teindre pendant le choix vendrait la mèche.
- */
-.ton-temps .carte-boite.revelee .pays[data-bucket="0"] {
-  fill: var(--seq-0);
-}
-.ton-temps .carte-boite.revelee .pays[data-bucket="1"] {
-  fill: var(--seq-1);
-}
-.ton-temps .carte-boite.revelee .pays[data-bucket="2"] {
-  fill: var(--seq-2);
-}
-.ton-temps .carte-boite.revelee .pays[data-bucket="3"] {
-  fill: var(--seq-3);
-}
-.ton-temps .carte-boite.revelee .pays[data-bucket="4"] {
-  fill: var(--seq-4);
+.ton-temps .carte-boite .pays.choisi {
+  opacity: 1;
+  stroke: var(--phosphore);
+  stroke-width: 1.5;
+  paint-order: stroke;
 }
 
-.ton-temps .carte-boite.revelee .pays {
-  opacity: 1;
+/* --- Le zoom vers le compteur ------------------------------------------------ */
+
+/*
+ * Pendant le zoom, la boîte redevient un cadre étanche : l'échelle du SVG
+ * déborderait sinon largement de la page.
+ */
+/*
+ * Le cadre s'efface avec le monde : plus de fond, plus de bordure. Le fond de
+ * page étant déjà quasi noir, il ne reste que le pays en gros plan.
+ */
+.ton-temps .carte-boite.zoome {
+  overflow: hidden;
+  border-color: transparent;
+  background: var(--nuit);
+  transition:
+    background 900ms ease-in,
+    border-color 900ms ease-in;
 }
+
+.ton-temps .carte-boite.zoome .carte {
+  transition: transform 1200ms cubic-bezier(0.66, 0, 0.24, 1);
+}
+
+/* Le monde s'efface, ton pays reste. */
+.ton-temps .carte-boite.zoome .pays {
+  transition:
+    opacity 800ms ease-in,
+    fill 800ms ease-in;
+}
+
+.ton-temps .carte-boite.zoome .pays:not(.choisi) {
+  opacity: 0;
+}
+
+.ton-temps .carte-boite.zoome .pays.choisi {
+  fill: var(--ambre);
+  stroke-width: 0;
+}
+
+@keyframes ton-temps-efface {
+  to {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+}
+
+.ton-temps .carte-bulle {
+  position: absolute;
+  z-index: 3;
+  transform: translate(-50%, calc(-100% - 0.75rem));
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 14rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--ambre);
+  background: var(--nuit);
+  font-size: 0.75rem;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.ton-temps .carte-bulle strong {
+  font-weight: 600;
+  color: var(--ambre);
+}
+
+.ton-temps .carte-bulle span {
+  font-variant-numeric: tabular-nums;
+  color: var(--phosphore-faible);
+}
+
+/* --- Légende ---------------------------------------------------------------- */
 
 .ton-temps .legende {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
+  gap: var(--space-2) var(--space-4);
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 0.8125rem;
-  color: var(--encre-douce);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--phosphore-faible);
 }
 
 .ton-temps .legende li {
@@ -177,26 +350,41 @@
 }
 
 .ton-temps .pastille {
-  width: 1rem;
-  height: 1rem;
-  border-radius: 3px;
-  border: 1px solid var(--trait);
+  width: 1.25rem;
+  height: 0.625rem;
+  border: 1px solid var(--filet);
 }
 
-.ton-temps .pastille[data-bucket="0"] {
-  background: var(--seq-0);
+.ton-temps .legende[data-echelle="vie"] .pastille[data-bucket="0"] {
+  background: var(--vie-0);
 }
-.ton-temps .pastille[data-bucket="1"] {
-  background: var(--seq-1);
+.ton-temps .legende[data-echelle="vie"] .pastille[data-bucket="1"] {
+  background: var(--vie-1);
 }
-.ton-temps .pastille[data-bucket="2"] {
-  background: var(--seq-2);
+.ton-temps .legende[data-echelle="vie"] .pastille[data-bucket="2"] {
+  background: var(--vie-2);
 }
-.ton-temps .pastille[data-bucket="3"] {
-  background: var(--seq-3);
+.ton-temps .legende[data-echelle="vie"] .pastille[data-bucket="3"] {
+  background: var(--vie-3);
 }
-.ton-temps .pastille[data-bucket="4"] {
-  background: var(--seq-4);
+.ton-temps .legende[data-echelle="vie"] .pastille[data-bucket="4"] {
+  background: var(--vie-4);
+}
+
+.ton-temps .legende[data-echelle="finale"] .pastille[data-bucket="0"] {
+  background: var(--finale-0);
+}
+.ton-temps .legende[data-echelle="finale"] .pastille[data-bucket="1"] {
+  background: var(--finale-1);
+}
+.ton-temps .legende[data-echelle="finale"] .pastille[data-bucket="2"] {
+  background: var(--finale-2);
+}
+.ton-temps .legende[data-echelle="finale"] .pastille[data-bucket="3"] {
+  background: var(--finale-3);
+}
+.ton-temps .legende[data-echelle="finale"] .pastille[data-bucket="4"] {
+  background: var(--finale-4);
 }
 
 /* --- Choix du pays --------------------------------------------------------- */
@@ -204,41 +392,64 @@
 .ton-temps .choix-barre {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   gap: var(--space-4);
   padding: var(--space-4);
-  border: 1px solid var(--trait);
-  border-radius: var(--radius-md);
-  background: var(--carton);
+  border: 1px solid var(--filet);
+  background: var(--panneau);
 }
 
 .ton-temps .choix-label {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  font-size: 0.8125rem;
-  color: var(--encre-douce);
+  gap: var(--space-2);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--phosphore-faible);
 }
 
 .ton-temps .choix-label select {
-  min-width: 14rem;
+  min-width: 16rem;
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--trait);
-  border-radius: var(--radius-sm);
-  background: var(--carton);
-  color: var(--encre);
+  border: 1px solid var(--filet);
+  background: var(--nuit);
+  color: var(--phosphore);
   font: inherit;
-  font-size: 1rem;
+  font-size: 0.9375rem;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.ton-temps .choix-label select:hover {
+  border-color: var(--ambre);
 }
 
 .ton-temps .choix-resume {
-  flex: 1 1 16rem;
+  flex: 1 1 18rem;
   margin: 0;
-  font-size: 0.9375rem;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  font-variant-numeric: tabular-nums;
+  color: var(--phosphore-faible);
 }
 
-.ton-temps .choix-resume.muet {
-  color: var(--encre-douce);
+.ton-temps .choix-resume strong {
+  font-weight: 600;
+  color: var(--ambre);
+}
+
+.ton-temps .choix-resume.muet::before {
+  content: "> ";
+  color: var(--ambre);
+}
+
+/* Placé ici, et pas avec le reste du zoom : `.choix-barre` est défini
+   juste au-dessus, et l'inverse ferait une spécificité descendante. */
+.ton-temps .ecran.sortie .titre,
+.ton-temps .ecran.sortie .intro,
+.ton-temps .ecran.sortie .choix-barre {
+  animation: ton-temps-efface 380ms ease-out both;
 }
 
 /* --- Le compteur ----------------------------------------------------------- */
@@ -249,189 +460,674 @@
   z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
   margin-top: var(--space-6);
   padding: var(--space-4);
-  border: 1px solid var(--trait);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--carton) 92%, transparent);
-  backdrop-filter: blur(8px);
+  border: 1px solid var(--filet);
+  background: color-mix(in srgb, var(--panneau) 94%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.ton-temps .compteur-legende {
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--phosphore-faible);
 }
 
 .ton-temps .compteur-chiffre {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
-.ton-temps .compteur-valeur {
-  font-size: clamp(2rem, 7vw, 3.5rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
+/*
+ * Les palettes du compteur : un caractère par case, comme un afficheur
+ * mécanique. La largeur est fixée en `ch` — sur une police à chasse fixe,
+ * la ligne ne danse donc pas quand le nombre perd un chiffre.
+ */
+.ton-temps .palettes {
+  display: flex;
+  gap: 3px;
+}
+
+.ton-temps .palette {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) 0.35ch;
+  border: 1px solid var(--filet);
+  background: var(--nuit);
+  font-size: clamp(1.75rem, 6vw, 3rem);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ambre);
+}
+
+.ton-temps .palette-espace {
+  width: 0.4ch;
 }
 
 .ton-temps .compteur-unite {
-  font-size: 1rem;
-  color: var(--encre-douce);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--phosphore-faible);
+}
+
+.ton-temps .compteur-annees {
+  padding: 2px var(--space-2);
+  border: 1px solid var(--ambre);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--ambre);
 }
 
 .ton-temps .compteur-pays {
   margin: 0;
-  font-size: 0.8125rem;
-  color: var(--encre-douce);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--phosphore-faible);
 }
 
 .ton-temps .compteur-actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-  margin-top: var(--space-2);
 }
 
+/* --- Jauge ------------------------------------------------------------------ */
+
 .ton-temps .jauge {
-  height: 6px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--encre) 10%, transparent);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--phosphore-faible);
+}
+
+.ton-temps .jauge-piste {
+  flex: 1;
+  height: 0.875rem;
+  border: 1px solid var(--filet);
+  background: var(--nuit);
   overflow: hidden;
 }
 
+/*
+ * Pas de `transition` sur la largeur : le pourcentage est calculé depuis la
+ * valeur *animée* du compteur, qui lisse déjà chaque changement. En ajouter
+ * une par-dessus faisait retarder la barre de 160 ms sur son propre chiffre.
+ */
 .ton-temps .jauge-remplie {
   height: 100%;
-  border-radius: 999px;
-  background: var(--bleu);
-  transition: width var(--transition);
+  background: repeating-linear-gradient(
+    90deg,
+    var(--ambre) 0,
+    var(--ambre) 4px,
+    transparent 4px,
+    transparent 6px
+  );
 }
 
-/* --- Cartes d'activité ------------------------------------------------------ */
+/* --- La nuit ----------------------------------------------------------------- */
+
+/*
+ * Le noir complet, et rien d'autre. C'est le seul moment du jeu où l'écran ne
+ * montre qu'une phrase : plus de compteur, plus de liste, rien à lire à côté.
+ *
+ * Le déroulé tient dans les délais des trois animations ci-dessous, et leur
+ * total doit rester égal à `NUIT_MS` côté React :
+ *   0 → 500      le voile se ferme
+ *   500 → 1200   la phrase apparaît
+ *   1200 → 3100  temps de lecture
+ *   3100 → 4200  le scintillement, jusqu'à l'effacement
+ */
+.ton-temps .nuit {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  background: #000000;
+  text-align: center;
+  animation: ton-temps-nuit-voile 500ms ease-in both;
+}
+
+@keyframes ton-temps-nuit-voile {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ton-temps .nuit-mot {
+  margin: 0;
+  max-width: 26ch;
+  font-size: clamp(1.5rem, 4.5vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--phosphore);
+  animation:
+    ton-temps-nuit-entree 700ms ease-out 500ms both,
+    ton-temps-scintille 1100ms steps(1, end) 3100ms both;
+}
+
+.ton-temps .nuit-mot strong {
+  font-weight: 600;
+  color: var(--ambre);
+}
+
+.ton-temps .nuit-sous {
+  display: block;
+  margin-top: var(--space-4);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--phosphore-faible);
+}
+
+/*
+ * L'écran se met au point, comme un tube qui chauffe.
+ *
+ * Surtout pas d'`letter-spacing` animé ici : il change la largeur du texte,
+ * donc le nombre de lignes, et la phrase se repliait de trois lignes à deux
+ * en cours de route. `filter` et `transform` ne touchent pas à la mise en
+ * page — les retours à la ligne sont posés dès la première image.
+ */
+@keyframes ton-temps-nuit-entree {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: scale(1.03);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+/*
+ * Le scintillement « bug robot » : des sauts francs, jamais de fondu — d'où
+ * `steps(1, end)` sur la synchro. Il se termine à zéro, ce qui enchaîne
+ * naturellement sur l'écran suivant.
+ */
+@keyframes ton-temps-scintille {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+  9% {
+    opacity: 0.12;
+    transform: translateX(-5px) skewX(7deg);
+  }
+  15% {
+    opacity: 1;
+    transform: translateX(4px);
+  }
+  24% {
+    opacity: 0.45;
+    transform: none;
+  }
+  31% {
+    opacity: 1;
+    transform: translateX(-3px) skewX(-5deg);
+  }
+  43% {
+    opacity: 0.08;
+    transform: none;
+  }
+  51% {
+    opacity: 1;
+    transform: translateX(6px) skewX(3deg);
+  }
+  63% {
+    opacity: 0.6;
+    transform: none;
+  }
+  71% {
+    opacity: 1;
+    transform: translateX(-4px);
+  }
+  84% {
+    opacity: 0.05;
+    transform: none;
+  }
+  92% {
+    opacity: 0.8;
+    transform: translateX(2px);
+  }
+  100% {
+    opacity: 0;
+    transform: none;
+  }
+}
+
+.ton-temps .nuit-passer {
+  position: absolute;
+  right: var(--space-6);
+  bottom: var(--space-6);
+}
+
+/* --- Le temps d'attente : « Dormir » ----------------------------------------- */
+
+.ton-temps .veille {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-12);
+  z-index: 6;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+  animation: ton-temps-nuit-voile 600ms ease-out 200ms both;
+}
+
+.ton-temps .veille-mot {
+  margin: 0;
+  font-size: 0.8125rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--phosphore-faible);
+}
+
+/* --- Les lignes d'activité --------------------------------------------------- */
 
 .ton-temps .grille {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-  gap: var(--space-3);
+  display: flex;
+  flex-direction: column;
   margin: var(--space-2) 0 0;
   padding: 0;
   list-style: none;
+  border-top: 1px solid var(--filet);
 }
 
-.ton-temps .carte-activite {
+.ton-temps .ligne {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--filet);
+  transition: background var(--transition);
+}
+
+.ton-temps .ligne:hover {
+  background: var(--panneau);
+}
+
+.ton-temps .ligne.prise {
+  background: color-mix(in srgb, var(--ambre) 8%, transparent);
+  box-shadow: inset 2px 0 0 var(--ambre);
+}
+
+.ton-temps .ligne.subie {
+  background: color-mix(in srgb, var(--phosphore) 4%, transparent);
+  box-shadow: inset 2px 0 0 var(--phosphore-faible);
+}
+
+/* Le nom, les points de conduite, le coût : la ligne d'un sommaire. */
+.ton-temps .ligne-tete {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  border: 1px solid var(--trait);
-  border-radius: var(--radius-md);
-  background: var(--carton);
-  transition: border-color var(--transition);
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
 }
 
-.ton-temps .carte-activite.prise {
-  border-color: var(--bleu);
-  box-shadow: inset 3px 0 0 var(--bleu);
-}
-
-.ton-temps .etiquette {
-  display: flex;
-  gap: var(--space-3);
-}
-
-.ton-temps .emoji {
-  font-size: 1.5rem;
-  line-height: 1;
+.ton-temps .ligne-marque {
+  color: var(--ambre);
 }
 
 .ton-temps .activite-titre {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.ton-temps .activite-detail {
-  margin: var(--space-1) 0 0;
-  font-size: 0.875rem;
-  color: var(--encre-douce);
+/* `--filet` est trop sombre pour des pointillés : ils disparaissaient. */
+.ton-temps .conduite {
+  flex: 1;
+  min-width: var(--space-4);
+  height: 0.75em;
+  border-bottom: 1px dotted color-mix(in srgb, var(--phosphore-faible) 55%, transparent);
 }
 
 .ton-temps .activite-cout {
-  margin: var(--space-2) 0 0;
-  font-size: 0.9375rem;
+  margin: 0;
+  font-size: 0.875rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--phosphore);
 }
 
 .ton-temps .activite-part {
   font-weight: 400;
-  color: var(--encre-douce);
+  color: var(--ambre);
+}
+
+/* Les commentaires, sous le nom. */
+.ton-temps .ligne-note {
+  grid-column: 1;
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--phosphore-faible);
+}
+
+.ton-temps .ligne-note::before {
+  content: "# ";
+  color: var(--filet);
 }
 
 .ton-temps .activite-source {
-  margin: var(--space-1) 0 0;
-  font-size: 0.75rem;
-  color: var(--encre-douce);
-  opacity: 0.8;
+  color: color-mix(in srgb, var(--phosphore-faible) 75%, transparent);
 }
 
-.ton-temps .quantite {
+/* Largeur commune : boutons, compteurs et verrous forment une seule colonne
+   alignée à droite, quelle que soit la forme du contrôle. */
+.ton-temps .ligne-controle {
+  grid-column: 2;
+  grid-row: 1 / span 2;
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.ton-temps .quantite-valeur {
-  min-width: 3ch;
-  text-align: center;
-  font-size: 1.125rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  justify-content: flex-end;
+  min-width: 11rem;
 }
 
 /* --- Boutons ---------------------------------------------------------------- */
 
 .ton-temps .bouton {
   padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--trait);
-  border-radius: var(--radius-sm);
-  background: var(--carton);
-  color: var(--encre);
+  border: 1px solid var(--filet);
+  background: transparent;
+  color: var(--phosphore);
   font: inherit;
-  font-size: 0.9375rem;
-  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  /* Le viseur de la carte, étendu à tous les contrôles : on ne clique pas
+     sur cette machine, on pointe. */
+  cursor: crosshair;
   transition:
     background var(--transition),
-    border-color var(--transition);
+    border-color var(--transition),
+    color var(--transition);
 }
 
 .ton-temps .bouton:hover:not(:disabled) {
-  border-color: var(--bleu);
+  border-color: var(--ambre);
+  color: var(--ambre);
 }
 
 .ton-temps .bouton:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
 .ton-temps .bouton.primaire {
-  background: var(--bleu);
-  border-color: var(--bleu);
-  color: #ffffff;
-  font-weight: 600;
+  border-color: var(--ambre);
+  background: var(--ambre);
+  color: var(--nuit);
 }
 
 .ton-temps .bouton.primaire:hover:not(:disabled) {
-  background: #1c5cab;
+  background: var(--phosphore);
+  border-color: var(--phosphore);
+  color: var(--nuit);
 }
 
 .ton-temps .bouton.rond {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
   padding: 0;
-  border-radius: 999px;
-  font-size: 1.25rem;
-  line-height: 1;
+  font-size: 1rem;
 }
 
-/* --- Bilan ------------------------------------------------------------------ */
+/* Placé ici, et pas avec `.veille` : `.bouton` est défini juste au-dessus,
+   et l'inverse ferait une spécificité descendante. */
+.ton-temps .veille .bouton {
+  padding: var(--space-3) var(--space-8);
+  font-size: 0.875rem;
+}
+
+/*
+ * L'interrupteur du son. Il n'existe pas de `prefers-reduced-sound` : ce
+ * bouton est le seul recours du joueur, il reste donc visible sur tous les
+ * écrans, y compris au-dessus du noir de la nuit.
+ */
+.ton-temps .bouton-son {
+  position: fixed;
+  left: var(--space-4);
+  bottom: var(--space-4);
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--nuit);
+  font-size: 0.6875rem;
+  color: var(--phosphore-faible);
+}
+
+.ton-temps .bouton-son.allume {
+  color: var(--ambre);
+  border-color: color-mix(in srgb, var(--ambre) 45%, var(--filet));
+}
+
+.ton-temps .bouton-son-barres {
+  letter-spacing: -0.1em;
+}
+
+/*
+ * Le pouls : deux temps, comme un vrai battement — une systole franche, une
+ * diastole plus courte, puis le repos. `transform` seul, donc rien ne bouge
+ * dans la mise en page.
+ */
+.ton-temps .bouton.pouls {
+  animation: ton-temps-pouls 1100ms ease-in-out infinite;
+}
+
+@keyframes ton-temps-pouls {
+  0%,
+  40%,
+  100% {
+    transform: scale(1);
+  }
+  8% {
+    transform: scale(1.045);
+  }
+  18% {
+    transform: scale(1);
+  }
+  26% {
+    transform: scale(1.022);
+  }
+}
+
+/* Le sommeil est déjà déduit : la ligne le montre sans offrir de bouton. */
+.ton-temps .verrou {
+  margin: 0;
+  padding: var(--space-2) 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--phosphore-faible);
+}
+
+.ton-temps .quantite {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ton-temps .quantite-champ {
+  width: 4.5rem;
+  padding: var(--space-2) var(--space-1);
+  border: 1px solid var(--filet);
+  background: var(--nuit);
+  color: var(--ambre);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.ton-temps .quantite-champ:hover {
+  border-color: var(--ambre);
+}
+
+.ton-temps .quantite-champ,
+.ton-temps .choix-label select {
+  cursor: crosshair;
+}
+
+/* --- Bilan : les quatre étapes ---------------------------------------------- */
+
+/*
+ * La cascade de palettes.
+ *
+ * Chaque enfant direct de l'étape pivote sur son bord haut, l'un après
+ * l'autre — le compteur d'heures, mais à l'échelle de l'écran. Le remontage
+ * est déclenché côté React par une `key` : c'est lui qui rejoue l'animation.
+ *
+ * Le décalage se fait au `nth-child` plutôt qu'avec une variable posée en
+ * ligne : les étapes rendent des éléments frères quelconques, et React n'a
+ * donc pas de prise pour numéroter les enfants.
+ */
+.ton-temps .etape {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  perspective: 900px;
+}
+
+.ton-temps .etape > * {
+  transform-origin: top center;
+  backface-visibility: hidden;
+  animation: ton-temps-bascule 280ms cubic-bezier(0.2, 0.75, 0.2, 1) both;
+}
+
+.ton-temps .etape > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.ton-temps .etape > *:nth-child(2) {
+  animation-delay: 70ms;
+}
+.ton-temps .etape > *:nth-child(3) {
+  animation-delay: 140ms;
+}
+.ton-temps .etape > *:nth-child(4) {
+  animation-delay: 210ms;
+}
+.ton-temps .etape > *:nth-child(5) {
+  animation-delay: 280ms;
+}
+.ton-temps .etape > *:nth-child(6) {
+  animation-delay: 350ms;
+}
+.ton-temps .etape > *:nth-child(7) {
+  animation-delay: 420ms;
+}
+.ton-temps .etape > *:nth-child(8) {
+  animation-delay: 490ms;
+}
+.ton-temps .etape > *:nth-child(n + 9) {
+  animation-delay: 560ms;
+}
+
+@keyframes ton-temps-bascule {
+  from {
+    transform: rotateX(-92deg);
+    opacity: 0;
+  }
+  to {
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+/*
+ * Le garde-fou global ne suffit pas ici : il écrase la durée mais pas le
+ * délai, et l'écran se remplirait quand même par à-coups sur 560 ms.
+ */
+/*
+ * Le garde-fou global ne suffit pas ici : il écrase la durée mais pas le
+ * délai, et l'écran se remplirait quand même par à-coups sur 560 ms. Pour la
+ * pulsation et le zoom, il laisserait en plus passer une image de saut.
+ *
+ * Le reste du repli est côté React : le zoom et l'ouverture sont carrément
+ * sautés, pas seulement accélérés.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .ton-temps .etape > *,
+  .ton-temps .bouton.pouls,
+  .ton-temps .ecran.sortie .titre,
+  .ton-temps .ecran.sortie .intro,
+  .ton-temps .ecran.sortie .choix-barre,
+  .ton-temps .veille,
+  .ton-temps .nuit,
+  .ton-temps .nuit-mot {
+    animation: none;
+  }
+
+  .ton-temps .carte-boite.zoome .carte,
+  .ton-temps .carte-boite.zoome .pays {
+    transition: none;
+  }
+}
+
+.ton-temps .etape-lieu {
+  margin: 0;
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ambre);
+}
+
+.ton-temps .etape-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-8);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--filet);
+}
+
+.ton-temps .etape-rang {
+  margin-right: auto;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+  color: var(--phosphore-faible);
+}
 
 .ton-temps .reparti {
   display: grid;
@@ -443,77 +1139,215 @@
 
 .ton-temps .part {
   display: grid;
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 
 .ton-temps .part-tete {
   display: flex;
   justify-content: space-between;
   gap: var(--space-4);
-  font-size: 0.9375rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   font-variant-numeric: tabular-nums;
 }
 
-.ton-temps .part-pourcent {
-  font-size: 0.8125rem;
-  color: var(--encre-douce);
+.ton-temps .part-tete strong {
+  font-weight: 600;
+  color: var(--ambre);
 }
 
 .ton-temps .chute {
   margin-top: var(--space-8);
   padding: var(--space-6);
-  border: 1px solid var(--trait);
-  border-radius: var(--radius-lg);
-  background: var(--carton);
+  border: 1px solid var(--filet);
+  background: var(--panneau);
 }
 
 .ton-temps .chute.sombre {
-  border-color: color-mix(in srgb, var(--bleu) 40%, var(--trait));
-  background: color-mix(in srgb, var(--bleu) 7%, var(--carton));
+  border-color: var(--rouge);
+  background: color-mix(in srgb, var(--rouge) 8%, var(--panneau));
 }
 
-.ton-temps .chute-titre {
-  margin: 0 0 var(--space-3);
-  font-size: 1.5rem;
-  letter-spacing: -0.01em;
+/* Le chiffre qui porte l'étape : c'est lui qu'on doit lire en premier. */
+.ton-temps .chute-chiffre {
+  margin: 0 0 var(--space-4);
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--phosphore-faible);
 }
 
-.ton-temps .chute-titre em {
-  font-style: normal;
-  color: var(--bleu);
+/* `> ` pour passer devant `.chute strong`, de même poids mais déclaré plus bas. */
+.ton-temps .chute > .chute-chiffre strong {
+  display: block;
+  font-size: clamp(2rem, 7vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--ambre);
+}
+
+.ton-temps .chute.sombre > .chute-chiffre strong {
+  color: var(--rouge);
 }
 
 .ton-temps .chute p {
   margin: 0 0 var(--space-3);
-  max-width: 60ch;
+  max-width: 64ch;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: var(--phosphore-faible);
+}
+
+.ton-temps .chute strong {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--phosphore);
+}
+
+.ton-temps .chute.sombre strong {
+  color: var(--rouge);
 }
 
 .ton-temps .chute-liste-intro {
-  color: var(--encre-douce);
-  font-size: 0.9375rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .ton-temps .chute-liste {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
-  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
   margin: 0;
   padding: 0;
   list-style: none;
+  border-top: 1px solid var(--filet);
 }
 
 .ton-temps .chute-liste li {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--encre) 5%, transparent);
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--filet);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ton-temps .chute-liste strong {
+  font-weight: 600;
+  color: var(--ambre);
+}
+
+/* --- Les chiffres, et où agir ------------------------------------------------ */
+
+.ton-temps .chiffres {
+  display: grid;
+  gap: var(--space-6);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ton-temps .chiffre {
+  display: grid;
+  gap: var(--space-1);
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--filet);
+}
+
+.ton-temps .chiffre-valeur {
+  margin: 0;
+  font-size: clamp(1.75rem, 5vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ambre);
+}
+
+.ton-temps .chiffre-prefixe {
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--phosphore-faible);
+}
+
+.ton-temps .chiffre-label {
+  margin: 0;
+  max-width: 52ch;
   font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--phosphore);
+}
+
+.ton-temps .chiffre-source {
+  margin: 0;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  color: var(--phosphore-faible);
+}
+
+.ton-temps .chiffre-source::before {
+  content: "# ";
+  color: var(--filet);
+}
+
+.ton-temps .organisations {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--filet);
+}
+
+.ton-temps .organisations li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--filet);
+}
+
+.ton-temps .organisations a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ambre);
+  cursor: crosshair;
+}
+
+.ton-temps .organisations a:hover {
+  color: var(--phosphore);
+  text-decoration: underline;
+}
+
+.ton-temps .organisation-mission {
+  padding-left: var(--space-4);
+  font-size: 0.75rem;
+  color: var(--phosphore-faible);
 }
 
 @media (max-width: 40rem) {
   .ton-temps .compteur {
     position: static;
+  }
+
+  .ton-temps .ligne {
+    grid-template-columns: 1fr;
+  }
+
+  .ton-temps .ligne-controle {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
   }
 }

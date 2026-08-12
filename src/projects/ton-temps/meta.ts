@@ -7,5 +7,6 @@ export default defineProject({
   publishedAt: '2026-08-12',
   status: 'live',
   tags: ['données', 'inégalités', 'carte'],
-  accent: '#2a78d6',
+  accent: '#ffb000',
+  cover: '/og/ton-temps.png',
 });

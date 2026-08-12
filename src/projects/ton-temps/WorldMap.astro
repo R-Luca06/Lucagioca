@@ -6,19 +6,14 @@
  * dans ce frontmatter : il devient du HTML et ne touche jamais le bundle JS.
  * L'island React se contente d'écouter les clics par délégation.
  *
- * Les seuils de couleur sont posés ici en attribut, au build. La révélation
- * finale n'est donc qu'un changement de classe CSS — zéro octet de JS pour
- * recolorer 169 pays.
+ * Le seuil de couleur est posé ici en attribut, au build. Les deux rampes du
+ * jeu — douce au choix, brutale au dernier écran — lisent le même `data-vie` :
+ * changer de lecture n'est donc qu'un changement de classe sur le conteneur,
+ * zéro octet de JS pour recolorer 169 pays.
  */
-import { byId, countries } from './data/countries';
+import { lifeBucket } from './buckets';
+import { byId } from './data/countries';
 import { shapes, viewBox } from './data/map-paths';
-
-const best = Math.max(...countries.map((c) => c.years));
-
-/** Années perdues par rapport au pays le mieux loti, par tranches de 6 ans. */
-function bucketOf(years: number): number {
-  return Math.min(4, Math.floor((best - years) / 6));
-}
 ---
 
 <svg
@@ -35,10 +30,12 @@ function bucketOf(years: number): number {
         <path
           d={shape.d}
           data-id={country?.id}
-          data-bucket={country ? bucketOf(country.years) : undefined}
+          data-vie={country ? lifeBucket(country.years) : undefined}
           class={country ? 'pays' : 'pays sans-donnees'}
         >
-          <title>{country ? `${country.name} — ${country.years} ans` : shape.name}</title>
+          {/* Les pays avec données ont la bulle React, plus riche et instantanée ;
+            un <title> ici doublerait l'infobulle native par-dessus. */}
+        {!country && <title>{shape.name}</title>}
         </path>
       );
     })

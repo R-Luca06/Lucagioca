@@ -37,20 +37,26 @@ export type Cost =
 export interface Activity {
   readonly id: string;
   readonly label: string;
-  /** Le coût dit en français, affiché sur la carte. */
-  readonly detail: string;
+  /**
+   * Le rythme dit en français — « 8 h par nuit », pas « 8 h ». Omis quand le
+   * coût calculé se suffit : le répéter ici l'afficherait deux fois sur la carte.
+   */
+  readonly detail?: string;
   /** D'où sort le chiffre. Affiché en petit : un jeu de données doit être vérifiable. */
   readonly source: string;
   readonly emoji: string;
   readonly cost: Cost;
+  /** Déduit d'office. La carte reste visible, mais on ne peut pas y renoncer. */
+  readonly mandatory?: boolean;
 }
 
 /**
  * Ce que la vie prend sans vraiment demander.
  *
- * Elles sont présentées comme facultatives — le compteur laisse refuser de
- * dormir. Personne ne le fait, et voir le tiers de sa vie partir d'un clic
- * frappe plus fort qu'une ligne déjà déduite qu'on subit sans la choisir.
+ * Le sommeil, lui, ne se refuse pas : il est `mandatory` et part du budget dès
+ * l'ouverture. On perd le clic qui faisait disparaître un tiers de la vie, mais
+ * l'animation d'ouverture reprend ce rôle — et une perte subie porte plus
+ * qu'une perte qu'on a choisie.
  */
 export const habits: readonly Activity[] = [
   {
@@ -60,6 +66,7 @@ export const habits: readonly Activity[] = [
     source: 'durée recommandée pour un adulte',
     emoji: '😴',
     cost: { kind: 'daily', hours: 8 },
+    mandatory: true,
   },
   {
     id: 'manger',
@@ -119,12 +126,17 @@ export const habits: readonly Activity[] = [
   },
 ];
 
-/** Ce qu'on choisit vraiment. Quantité libre. */
+/**
+ * Ce qu'on choisit vraiment. Quantité libre.
+ *
+ * Pas de `detail` ici : leur coût ne dépend pas du pays, donc l'étiquette
+ * l'affiche déjà tel quel. L'écrire une deuxième fois à la main, c'était le
+ * même nombre deux lignes de suite sur chaque carte. La `source` justifie.
+ */
 export const pursuits: readonly Activity[] = [
   {
     id: 'roman',
     label: 'Lire un roman',
-    detail: '8 h',
     source: '≈ 100 000 mots à 250 mots/minute',
     emoji: '📖',
     cost: { kind: 'once', hours: 8 },
@@ -132,7 +144,6 @@ export const pursuits: readonly Activity[] = [
   {
     id: 'the-office',
     label: 'Regarder The Office en entier',
-    detail: '74 h',
     source: '201 épisodes de 22 minutes',
     emoji: '📺',
     cost: { kind: 'once', hours: 74 },
@@ -140,7 +151,6 @@ export const pursuits: readonly Activity[] = [
   {
     id: 'marvel',
     label: 'Voir toute la saga Marvel',
-    detail: '80 h',
     source: '35 films d’environ 2 h 15',
     emoji: '🦸',
     cost: { kind: 'once', hours: 80 },
@@ -148,7 +158,6 @@ export const pursuits: readonly Activity[] = [
   {
     id: 'permis',
     label: 'Passer le permis',
-    detail: '50 h',
     source: '20 h de conduite minimum, plus le code et la pratique réelle',
     emoji: '🚗',
     cost: { kind: 'once', hours: 50 },
@@ -156,7 +165,6 @@ export const pursuits: readonly Activity[] = [
   {
     id: 'marathon',
     label: 'Courir un marathon',
-    detail: '110 h',
     source: 'plan de préparation de 18 semaines, course comprise',
     emoji: '🥇',
     cost: { kind: 'once', hours: 110 },
@@ -164,7 +172,6 @@ export const pursuits: readonly Activity[] = [
   {
     id: 'langue',
     label: 'Apprendre une langue',
-    detail: '750 h',
     source: 'niveau B2 pour une langue proche, estimation Foreign Service Institute',
     emoji: '🗣️',
     cost: { kind: 'once', hours: 750 },
@@ -172,7 +179,6 @@ export const pursuits: readonly Activity[] = [
   {
     id: 'coder',
     label: 'Apprendre à coder',
-    detail: '1 500 h',
     source: 'jusqu’au niveau où l’on peut en vivre',
     emoji: '⌨️',
     cost: { kind: 'once', hours: 1500 },
@@ -180,7 +186,6 @@ export const pursuits: readonly Activity[] = [
   {
     id: 'piano',
     label: 'Apprendre le piano',
-    detail: '3 000 h',
     source: 'jusqu’à jouer correctement, pas jusqu’au concert',
     emoji: '🎹',
     cost: { kind: 'once', hours: 3000 },
@@ -188,7 +193,6 @@ export const pursuits: readonly Activity[] = [
   {
     id: 'tour-du-monde',
     label: 'Faire le tour du monde',
-    detail: '8 766 h',
     source: 'une année entière, sac au dos',
     emoji: '🌍',
     cost: { kind: 'once', hours: 8766 },
@@ -196,7 +200,6 @@ export const pursuits: readonly Activity[] = [
   {
     id: 'enfant',
     label: 'Élever un enfant',
-    detail: '11 000 h',
     source: 'temps de soin actif jusqu’à ses 18 ans',
     emoji: '🧸',
     cost: { kind: 'once', hours: 11000 },
@@ -210,6 +213,11 @@ export const byActivityId = new Map(allActivities.map((a) => [a.id, a]));
 /** Heures d'une vie entière. C'est le budget du joueur. */
 export function lifetimeHours(years: number): number {
   return years * DAYS_PER_YEAR * 24;
+}
+
+/** L'inverse. Un compteur en heures ne se ressent pas ; en années, si. */
+export function yearsFromHours(hours: number): number {
+  return hours / (DAYS_PER_YEAR * 24);
 }
 
 /**
@@ -233,6 +241,25 @@ export function hoursFor(activity: Activity, lifeYears: number): number {
 }
 
 export type Basket = Readonly<Record<string, number>>;
+
+/** Ce qui est déjà déduit avant le premier clic. */
+export const mandatoryIds: readonly string[] = allActivities
+  .filter((a) => a.mandatory)
+  .map((a) => a.id);
+
+/**
+ * Rétablit les lignes obligatoires dans un panier.
+ *
+ * Sert au démarrage, mais aussi à la relecture d'une sauvegarde écrite quand
+ * dormir se refusait encore : sans ça, une vieille partie rouvrirait sans sommeil.
+ */
+export function withMandatory(basket: Basket): Record<string, number> {
+  const next = { ...basket };
+  for (const id of mandatoryIds) {
+    if ((next[id] ?? 0) <= 0) next[id] = 1;
+  }
+  return next;
+}
 
 /** Total dépensé par un panier, recalculé pour l'espérance de vie donnée. */
 export function basketHours(basket: Basket, lifeYears: number): number {
