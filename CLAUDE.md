@@ -23,6 +23,7 @@ src/projects/<slug>/
 ├─ Page.astro     obligatoire — le contenu de la page
 ├─ <Jeu>.tsx      optionnel — island React
 ├─ <slug>.css     optionnel — styles LOCAUX, préfixés par .<slug>
+├─ *.test.ts      optionnel — tests unitaires, ramassés automatiquement
 └─ assets/        optionnel
 ```
 
@@ -63,11 +64,32 @@ dans `shared/` qu'à partir du **troisième** usage réel.
 6. **Le backend est optionnel par jeu.** Un jeu doit rester jouable si l'API
    est indisponible.
 
+## Ce qu'on teste, et où
+
+Deux niveaux, qui ne se recouvrent pas :
+
+- **Vitest** (`src/**/*.test.ts`) pour la **logique pure** — le calcul, le
+  découpage, l'aléa, le stockage. Le fichier de test est posé **à côté** du
+  module qu'il couvre, donc dans le dossier du projet : un nouveau jeu apporte
+  ses tests avec lui, sans rien enregistrer ailleurs.
+- **Playwright** (`tests/e2e/`) pour la **page** — elle se charge, elle
+  n'imprime pas d'erreur console, elle ne déborde pas. Paramétré sur le
+  registre : chaque nouveau projet est couvert sans écrire une ligne.
+
+Ce qui mérite un test unitaire : tout ce qui produit un **nombre affiché au
+joueur**. Un calcul faux ne plante pas, il ment — et aucun test de bout en bout
+ne le verra. Ce qui n'en mérite pas : les composants React, le Web Audio, le
+DOM. Le smoke e2e y suffit.
+
+Quand tu écris un test, vérifie qu'il **échoue** si tu casses le code qu'il
+couvre. Un test vert du premier coup n'a encore rien prouvé.
+
 ## Commandes
 
 ```bash
 pnpm dev        # serveur de dev, drafts inclus
-pnpm verify     # lint + typecheck + build + budget + e2e  ← avant de pousser
+pnpm test       # tests unitaires (pnpm test:watch pour le mode continu)
+pnpm verify     # lint + typecheck + test + build + budget + e2e  ← avant de pousser
 pnpm build      # build de prod dans dist/
 ```
 
