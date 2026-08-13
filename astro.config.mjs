@@ -9,11 +9,15 @@ export default defineConfig({
    * L'adresse réelle du site. Elle sert aux URLs canoniques, aux images de
    * partage et au plan du site — tout ce qui doit être absolu.
    *
-   * C'est le sous-domaine offert par Cloudflare Pages. Le jour où un vrai nom
-   * de domaine est acheté, cette ligne est la seule à changer : ne pas laisser
-   * une adresse traîner en dur ailleurs.
+   * C'est l'adresse donnée par Cloudflare — un sous-domaine `workers.dev`, et
+   * non `pages.dev` : les deux produits ont fusionné, et un site statique créé
+   * aujourd'hui atterrit côté Workers.
+   *
+   * C'EST LE SEUL ENDROIT où l'adresse est écrite. `robots.txt` et le plan du
+   * site la dérivent d'ici. Le jour où un vrai nom de domaine est acheté, cette
+   * ligne suffit : ne jamais réintroduire une adresse en dur ailleurs.
    */
-  site: 'https://lucagioca.pages.dev',
+  site: 'https://lucagioca.escalade-motte-5u.workers.dev',
 
   integrations: [react(), sitemap()],
 
