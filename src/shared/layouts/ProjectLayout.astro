@@ -44,6 +44,27 @@ const { project } = Astro.props;
   <main id="jeu">
     <slot />
   </main>
+
+  {
+    project.credits.length > 0 && (
+      <footer class="credits">
+        <h2>Crédits</h2>
+        <ul>
+          {project.credits.map((credit) => (
+            <li>
+              {credit.url ? (
+                <a href={credit.url} rel="noopener noreferrer nofollow" target="_blank">
+                  {credit.label}
+                </a>
+              ) : (
+                credit.label
+              )}
+            </li>
+          ))}
+        </ul>
+      </footer>
+    )
+  }
 </BaseLayout>
 
 <style>
@@ -106,5 +127,45 @@ const { project } = Astro.props;
     .pointer-note {
       display: none;
     }
+  }
+
+  /*
+   * Discret, mais présent sur la page — c'est la condition des licences en BY.
+   *
+   * Il s'habille des jetons de chrome, que le projet a le droit de redéfinir :
+   * un bandeau crème sous un jeu en noir serait une déchirure. La réserve basse
+   * est généreuse à dessein — un jeu pose souvent un bouton fixe dans ce coin.
+   */
+  .credits {
+    margin-top: var(--space-16);
+    padding: var(--space-6) var(--space-6) var(--space-16);
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    line-height: 1.7;
+  }
+  .credits h2 {
+    margin: 0 0 var(--space-2);
+    font-size: inherit;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .credits ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .credits a {
+    color: inherit;
+    text-decoration-color: var(--border);
+    text-underline-offset: 2px;
+  }
+  .credits a:hover {
+    color: var(--text);
+    text-decoration-color: currentColor;
   }
 </style>

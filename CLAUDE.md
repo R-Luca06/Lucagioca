@@ -40,8 +40,19 @@ l'intérêt du site.
 | Partagé | Jamais partagé |
 |---|---|
 | Tokens d'espacement, rayons, anneau de focus | Couleurs de jeu, typographies, animations |
-| Chrome (`ProjectLayout` : retour, meta, badges) | Mise en page interne d'un jeu |
-| Moteur (`rng`, `storage`, `useGameLoop`) | Logique de règles |
+| Identité du site (`--paper`, `--ink`, `--red`, le logo) | Mise en page interne d'un jeu |
+| Chrome (`ProjectLayout` : retour, meta, badges, crédits) | Logique de règles |
+| Moteur (`rng`, `storage`, `useGameLoop`) | |
+
+L'identité **lucagioca** — crème, encre, rouge — habille l'accueil et le chrome,
+jamais l'intérieur d'un jeu. `--paper` et `--ink` sont des rôles : en mode
+sombre, leurs valeurs s'échangent et tout ce qui en dérive suit. `--red` ne
+bouge jamais, et ne sert **jamais** de couleur de texte courant : il vaut 3,5:1
+sur le crème, ce qui suffit à un aplat ou à un filet, pas à une phrase.
+
+Un projet a le droit de redéfinir les jetons de chrome pour sa page — c'est ce
+que fait `ton-temps` — afin que l'en-tête et le pied de page ne déchirent pas
+son ambiance.
 
 Un besoin qui n'apparaît que dans un projet reste dans ce projet. On ne remonte
 dans `shared/` qu'à partir du **troisième** usage réel.
@@ -63,6 +74,11 @@ dans `shared/` qu'à partir du **troisième** usage réel.
    Aucun sélecteur d'élément nu (`h1 { }`) en dehors de `tokens.css`.
 6. **Le backend est optionnel par jeu.** Un jeu doit rester jouable si l'API
    est indisponible.
+7. **Tout emprunt sous licence BY remplit `credits` dans `meta.ts`.** Son,
+   police, jeu de données : si la licence exige l'attribution, elle exige
+   qu'elle soit **visible depuis le site**, pas consignée dans le dépôt. Le
+   champ est rendu en pied de page par `ProjectLayout`. Un `CREDITS.md` non
+   reporté dans le manifeste est une infraction, pas une dette.
 
 ## Ce qu'on teste, et où
 

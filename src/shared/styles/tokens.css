@@ -8,6 +8,21 @@
  */
 
 :root {
+  /*
+   * Identité lucagioca. Trois couleurs, pas une de plus.
+   *
+   * `--paper` est le fond et `--ink` la marque : ce sont des rôles, pas des
+   * teintes. En mode sombre, leurs VALEURS s'échangent — le crème devient
+   * l'encre — et tout ce qui s'appuie dessus suit sans être retouché.
+   *
+   * `--red` ne bouge jamais : c'est lui qui tient l'identité d'un thème à
+   * l'autre. Il vaut 3,5:1 sur le crème et 4,3:1 sur l'encre — assez pour un
+   * aplat, un filet ou un anneau de focus, JAMAIS pour du texte courant.
+   */
+  --paper: #f2efe7;
+  --ink: #1b1b18;
+  --red: #e8412a;
+
   /* Espacement : échelle unique, pas de valeurs arbitraires ailleurs. */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -26,13 +41,14 @@
   --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
 
   /* Chrome du site (accueil + header/footer des projets) uniquement. */
-  --bg: #fbfaf8;
-  --surface: #ffffff;
-  --border: #e5e1da;
-  --text: #1a1917;
-  --text-muted: #6b6660;
+  --bg: var(--paper);
+  --surface: color-mix(in srgb, var(--paper) 82%, #ffffff);
+  --border: color-mix(in srgb, var(--ink) 14%, var(--paper));
+  --text: var(--ink);
+  --text-muted: color-mix(in srgb, var(--ink) 55%, var(--paper));
 
-  --accent: #5b8def;
+  /* Défaut du site. Chaque projet l'écrase avec sa propre couleur. */
+  --accent: var(--red);
 
   --ring: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent);
   --shadow-card: 0 1px 2px rgb(0 0 0 / 6%), 0 8px 24px rgb(0 0 0 / 5%);
@@ -40,23 +56,25 @@
   --transition: 160ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 
+/*
+ * Mode sombre : on échange les valeurs de `--paper` et `--ink`, et rien
+ * d'autre. Tout ce qui en dérive — bordures, texte atténué, surfaces — suit
+ * tout seul. Le jour où un interrupteur manuel arrivera, il n'aura qu'à poser
+ * `data-theme` sur `<html>` : le bloc est déjà là.
+ */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #12110f;
-    --surface: #1c1a18;
-    --border: #302d29;
-    --text: #f2efe9;
-    --text-muted: #a09a91;
+    --paper: #1b1b18;
+    --ink: #f2efe7;
+    --surface: color-mix(in srgb, var(--paper) 92%, #ffffff);
     --shadow-card: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 30%);
   }
 }
 
 :root[data-theme="dark"] {
-  --bg: #12110f;
-  --surface: #1c1a18;
-  --border: #302d29;
-  --text: #f2efe9;
-  --text-muted: #a09a91;
+  --paper: #1b1b18;
+  --ink: #f2efe7;
+  --surface: color-mix(in srgb, var(--paper) 92%, #ffffff);
   --shadow-card: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 30%);
 }
 

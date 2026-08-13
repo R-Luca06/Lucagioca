@@ -1,6 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const PORT = 4321;
+/*
+ * Volontairement différent du 4321 d'`astro dev`.
+ *
+ * Avec le même port et `reuseExistingServer`, un serveur de développement resté
+ * ouvert est adopté à la place du build de prod : les tests passent alors sur
+ * du code non compilé, et échouent sur un cache Vite périmé plutôt que sur un
+ * vrai défaut. Le diagnostic coûte cher pour une cause aussi bête.
+ */
+const PORT = 4322;
 
 export default defineConfig({
   testDir: './tests/e2e',
