@@ -100,15 +100,18 @@ const numero = (index: number) => String(index + 1).padStart(2, '0');
     }
 
     <footer class="pied">
+      {/* Lien et point sur la même ligne : un retour les décollerait. */}
       <p class="signe">
-        Fait par Luca, une expérience à la fois. Le code est{' '}
-        {/* Sur une seule ligne : un retour avant le point le décollerait du lien. */}
-        <a href="https://github.com/R-Luca06/Lucagioca" rel="noopener noreferrer" target="_blank">ouvert</a>.
+        Fait par Luca, une expérience à la fois. Le code est <a href="https://github.com/R-Luca06/Lucagioca" rel="noopener noreferrer" target="_blank">ouvert</a>.
       </p>
-      <p class="mentions">
-        Composé en Bricolage Grotesque, de Mathieu Triay — licence SIL Open Font.
-        <span class="annee">{annee}</span>
-      </p>
+      {/*
+        Pas de crédit de police ici, contrairement aux sons d'un jeu.
+        La licence SIL Open Font exige que son texte accompagne les FICHIERS de
+        police — il est versionné dans `src/shared/assets/` — mais n'impose
+        aucune mention visible sur les pages qui l'utilisent. Les licences CC BY
+        des sons, elles, l'imposent : voir la règle 7 de CLAUDE.md.
+      */}
+      <p class="mentions"><span class="annee">{annee}</span></p>
     </footer>
   </main>
 </BaseLayout>
