@@ -15,6 +15,24 @@ const numero = (index: number) => String(index + 1).padStart(2, '0');
   description="Une collection de petites expériences interactives."
   image="/og/accueil.png"
 >
+  <Fragment slot="head">
+    {/*
+      Armé AVANT la peinture, sinon le sommaire s'affiche puis disparaît pour
+      être rejoué — pire que pas d'animation du tout. Sans JavaScript ou en
+      mouvement réduit, rien n'est armé et tout est visible d'emblée : le
+      contenu ne dépend jamais de la mise en scène.
+    */}
+    <script is:inline>
+      try {
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.documentElement.dataset.ouverture = 'armee';
+        }
+      } catch {
+        /* Rien à armer : la page s'affiche telle quelle. */
+      }
+    </script>
+  </Fragment>
+
   <main class="accueil">
     <div class="grain" aria-hidden="true"></div>
 
@@ -47,7 +65,7 @@ const numero = (index: number) => String(index + 1).padStart(2, '0');
       ) : (
         <ol class="sommaire">
           {projects.map((project, index) => (
-            <li class="entree" style={`--accent: ${project.accent};`}>
+            <li class="entree" style={`--accent: ${project.accent}; --rang: ${index};`}>
               <a class="lien" href={`/p/${project.slug}`}>
                 <span class="numero" aria-hidden="true">
                   {numero(index)}
@@ -89,51 +107,74 @@ const numero = (index: number) => String(index + 1).padStart(2, '0');
 
 <script>
   /**
-   * La pastille se pose.
+   * L'ouverture : le « o » quitte le logo et va chercher le sommaire.
    *
-   * Le « o » rouge du logo reste en place — le retirer laisserait « gi ca », ce
-   * qui n'est plus le nom. C'est la puce du premier projet qui part de ses
-   * coordonnées et rejoint la sienne : le point se propage, il ne déménage pas.
+   * Le point ne se contente pas de se déplacer — c'est lui qui **amène** le
+   * contenu. Une pastille qui traverse une page déjà complète n'ouvre rien, elle
+   * bouge après coup ; ici les lignes n'existent qu'une fois qu'il est arrivé.
    *
-   * Purement additif : sans script, ou en mouvement réduit, les puces sont déjà
-   * à leur place et il n'y a rien à défaire.
+   * Le « o » ne revient pas : le logo garde son creux. C'est voulu, la lettre
+   * est partie travailler dans la liste.
+   *
+   * La traversée est confiée à une pastille flottante plutôt qu'au `<circle>`
+   * lui-même : un SVG rogne ce qui sort de sa `viewBox`, le cercle disparaîtrait
+   * au premier pixel franchi. L'échange des deux est simultané, donc invisible.
    */
-  const reduit = matchMedia('(prefers-reduced-motion: reduce)');
+  const racine = document.documentElement;
 
-  if (!reduit.matches) {
+  /** Tout révéler. Idempotent : appelable en fin d'animation comme en secours. */
+  const reveler = () => {
+    delete racine.dataset.ouverture;
+  };
+
+  if (racine.dataset.ouverture === 'armee') {
+    // Filet de sécurité : si quoi que ce soit échoue ici, la page ne doit pas
+    // rester vide. Le contenu se montre au plus tard, quoi qu'il arrive.
+    const secours = setTimeout(reveler, 2500);
+
     const source = document.querySelector<SVGCircleElement>('.logo-pastille');
     const cible = document.querySelector<HTMLElement>('.entree:first-child .pastille');
+    const depart = source?.getBoundingClientRect();
+    const arrivee = cible?.getBoundingClientRect();
 
-    if (source && cible) {
-      const depart = source.getBoundingClientRect();
-      const arrivee = cible.getBoundingClientRect();
+    if (source && depart && arrivee && depart.width > 0 && arrivee.width > 0) {
+      const voyageuse = document.createElement('div');
+      voyageuse.className = 'voyageuse';
+      voyageuse.style.width = `${depart.width}px`;
+      voyageuse.style.height = `${depart.height}px`;
+      voyageuse.style.left = `${depart.left}px`;
+      voyageuse.style.top = `${depart.top}px`;
+      document.body.append(voyageuse);
 
-      // Rien à animer si la mise en page n'est pas encore mesurable.
-      if (arrivee.width > 0 && depart.width > 0) {
-        const dx = depart.left - arrivee.left + (depart.width - arrivee.width) / 2;
-        const dy = depart.top - arrivee.top + (depart.height - arrivee.height) / 2;
-        const echelle = depart.width / arrivee.width;
+      // L'échange : le cercle du logo s'efface à l'instant où la doublure paraît.
+      source.style.opacity = '0';
 
-        cible.animate(
-          [
-            { transform: `translate(${dx}px, ${dy}px) scale(${echelle})`, opacity: 0 },
-            { opacity: 1, offset: 0.15 },
-            { transform: 'none', opacity: 1 },
-          ],
-          {
-            duration: 900,
-            delay: 350,
-            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-            fill: 'backwards',
-          },
-        );
+      const dx = arrivee.left - depart.left + (arrivee.width - depart.width) / 2;
+      const dy = arrivee.top - depart.top + (arrivee.height - depart.height) / 2;
 
-        // Le logo accuse le départ : une pulsation, au moment exact où ça part.
-        source.animate(
-          [{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }],
-          { duration: 420, delay: 350, easing: 'ease-out' },
-        );
-      }
+      const trajet = voyageuse.animate(
+        [
+          { transform: 'none' },
+          // Elle prend de la hauteur avant de redescendre : une chute droite
+          // ferait mécanique, ce petit arc lui donne du poids.
+          { transform: `translate(${dx * 0.55}px, ${dy * 0.28}px) scale(0.72)`, offset: 0.45 },
+          { transform: `translate(${dx}px, ${dy}px) scale(${arrivee.width / depart.width})` },
+        ],
+        { duration: 780, delay: 260, easing: 'cubic-bezier(0.65, 0, 0.35, 1)', fill: 'both' },
+      );
+
+      trajet.addEventListener('finish', () => {
+        clearTimeout(secours);
+        reveler();
+        // Recouvrement volontaire : la doublure s'efface pendant que la vraie
+        // puce paraît, on ne voit donc jamais de trou.
+        voyageuse
+          .animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, fill: 'forwards' })
+          .addEventListener('finish', () => voyageuse.remove());
+      });
+    } else {
+      clearTimeout(secours);
+      reveler();
     }
   }
 </script>
@@ -221,6 +262,46 @@ const numero = (index: number) => String(index + 1).padStart(2, '0');
 
   .entree {
     position: relative;
+  }
+
+  /*
+   * La mise en scène d'ouverture.
+   *
+   * Tout est piloté par un seul attribut posé sur `<html>` avant la peinture, et
+   * retiré à l'atterrissage de la pastille : les lignes arrivent alors en
+   * cascade, décalées par leur rang. Retirer l'attribut suffit à tout révéler,
+   * ce qui rend le secours du script trivial — et l'état par défaut du CSS,
+   * celui que voit un visiteur sans JavaScript, est la page complète.
+   */
+  .entree > * {
+    transition:
+      opacity 460ms ease-out calc(var(--rang, 0) * 90ms + 60ms),
+      transform 460ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--rang, 0) * 90ms + 60ms);
+  }
+  .filet {
+    transform-origin: left;
+    transition:
+      transform 620ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--rang, 0) * 90ms + 60ms),
+      background-color var(--transition);
+  }
+
+  :global(:root[data-ouverture='armee']) .entree > * {
+    opacity: 0;
+    transform: translateY(8px);
+    transition-delay: 0ms;
+  }
+  :global(:root[data-ouverture='armee']) .filet {
+    transform: scaleX(0);
+    transition-delay: 0ms;
+  }
+
+  /* La doublure qui traverse la page, hors de la `viewBox` du logo. */
+  :global(.voyageuse) {
+    position: fixed;
+    z-index: 50;
+    border-radius: 50%;
+    background: var(--red);
+    pointer-events: none;
   }
 
   /*
