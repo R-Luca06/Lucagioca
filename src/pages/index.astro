@@ -1,159 +1,283 @@
 ---
 import { listedProjects } from '@/registry';
+import Logo from '@/shared/Logo.astro';
 import BaseLayout from '@/shared/layouts/BaseLayout.astro';
 
 const projects = listedProjects;
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { month: 'short', year: 'numeric' });
+const numero = (index: number) => String(index + 1).padStart(2, '0');
 ---
 
 <BaseLayout
-  title="Projets"
+  title="lucagioca"
   description="Une collection de petites expériences interactives."
+  image="/og/accueil.png"
 >
-  <main class="wrap">
-    <header class="intro">
-      <h1>Projets</h1>
-      <p>Une collection de petites expériences interactives.</p>
+  <main class="accueil">
+    <div class="grain" aria-hidden="true"></div>
+
+    <header class="entete">
+      <h1 class="titre-site">
+        <span class="visually-hidden">lucagioca</span>
+        {/* Enveloppe locale : une classe scopée ici ne s'appliquerait pas à un
+            élément rendu par `Logo.astro`, qui porte sa propre portée. */}
+        <span class="marque"><Logo /></span>
+      </h1>
+      <p class="baseline">Une collection de petites expériences interactives.</p>
     </header>
 
     {
       projects.length === 0 ? (
-        <p class="empty">
+        <p class="vide">
           Aucun projet pour l'instant. Crée un dossier dans <code>src/projects/</code> avec un{' '}
           <code>meta.ts</code> et un <code>Page.astro</code> — il apparaîtra ici tout seul.
         </p>
       ) : (
-        <ul class="grid">
-          {projects.map((project) => (
-            <li class="card" style={`--accent: ${project.accent};`}>
-              <a href={`/p/${project.slug}`}>
-                {project.cover ? (
-                  <img class="cover" src={project.cover} alt="" width="480" height="270" loading="lazy" />
-                ) : (
-                  <div class="cover cover--placeholder" aria-hidden="true" />
-                )}
-                <div class="body">
-                  <h2>
+        <ol class="sommaire">
+          {projects.map((project, index) => (
+            <li class="entree" style={`--accent: ${project.accent};`}>
+              <a class="lien" href={`/p/${project.slug}`}>
+                <span class="numero" aria-hidden="true">
+                  {numero(index)}
+                </span>
+                <span class="pastille" aria-hidden="true" />
+
+                <span class="corps">
+                  <span class="nom">
                     {project.title}
-                    {project.status === 'draft' && <span class="draft">brouillon</span>}
-                  </h2>
-                  <p>{project.blurb}</p>
-                  <time datetime={project.publishedAt}>
-                    {dateFormat.format(new Date(`${project.publishedAt}T00:00:00Z`))}
-                  </time>
-                </div>
+                    {project.status === 'draft' && <span class="brouillon">brouillon</span>}
+                  </span>
+                  <span class="blurb">{project.blurb}</span>
+                </span>
+
+                {project.thumb && (
+                  <img
+                    class="vignette"
+                    src={project.thumb}
+                    alt=""
+                    width="240"
+                    height="135"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
+
+                <time class="date" datetime={project.publishedAt}>
+                  {dateFormat.format(new Date(`${project.publishedAt}T00:00:00Z`))}
+                </time>
               </a>
+              <span class="filet" aria-hidden="true" />
             </li>
           ))}
-        </ul>
+        </ol>
       )
     }
   </main>
 </BaseLayout>
 
+<script>
+  /**
+   * La pastille se pose.
+   *
+   * Le « o » rouge du logo reste en place — le retirer laisserait « gi ca », ce
+   * qui n'est plus le nom. C'est la puce du premier projet qui part de ses
+   * coordonnées et rejoint la sienne : le point se propage, il ne déménage pas.
+   *
+   * Purement additif : sans script, ou en mouvement réduit, les puces sont déjà
+   * à leur place et il n'y a rien à défaire.
+   */
+  const reduit = matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (!reduit.matches) {
+    const source = document.querySelector<SVGCircleElement>('.logo-pastille');
+    const cible = document.querySelector<HTMLElement>('.entree:first-child .pastille');
+
+    if (source && cible) {
+      const depart = source.getBoundingClientRect();
+      const arrivee = cible.getBoundingClientRect();
+
+      // Rien à animer si la mise en page n'est pas encore mesurable.
+      if (arrivee.width > 0 && depart.width > 0) {
+        const dx = depart.left - arrivee.left + (depart.width - arrivee.width) / 2;
+        const dy = depart.top - arrivee.top + (depart.height - arrivee.height) / 2;
+        const echelle = depart.width / arrivee.width;
+
+        cible.animate(
+          [
+            { transform: `translate(${dx}px, ${dy}px) scale(${echelle})`, opacity: 0 },
+            { opacity: 1, offset: 0.15 },
+            { transform: 'none', opacity: 1 },
+          ],
+          {
+            duration: 900,
+            delay: 350,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+            fill: 'backwards',
+          },
+        );
+
+        // Le logo accuse le départ : une pulsation, au moment exact où ça part.
+        source.animate(
+          [{ transform: 'scale(1)' }, { transform: 'scale(1.12)' }, { transform: 'scale(1)' }],
+          { duration: 420, delay: 350, easing: 'ease-out' },
+        );
+      }
+    }
+  }
+</script>
+
 <style>
-  .wrap {
-    max-width: 68rem;
+  .accueil {
+    position: relative;
+    max-width: 62rem;
     margin: 0 auto;
-    padding: var(--space-16) var(--space-6) var(--space-16);
+    padding: clamp(var(--space-12), 12vh, var(--space-16)) var(--space-6) var(--space-16);
   }
 
-  .intro h1 {
-    margin: 0 0 var(--space-2);
-    font-size: clamp(2rem, 6vw, 3rem);
-    letter-spacing: -0.02em;
+  /*
+   * Le grain. Sans lui, #f2efe7 se lit comme un aplat beige ; avec lui, comme
+   * du papier. Fixe, donc il ne défile pas avec le contenu — c'est la surface,
+   * pas un motif posé dessus.
+   */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
-  .intro p {
-    margin: 0 0 var(--space-12);
+
+  /* Sur presque-noir, le même grain vire à la neige de téléviseur. */
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .grain {
+      opacity: 0.022;
+    }
+  }
+  :global(:root[data-theme='dark']) .grain {
+    opacity: 0.022;
+  }
+
+  .entete,
+  .sommaire,
+  .vide {
+    position: relative;
+    z-index: 1;
+  }
+
+  .entete {
+    margin-bottom: clamp(var(--space-12), 10vh, var(--space-16));
+  }
+
+  .titre-site {
+    margin: 0;
+  }
+
+  /*
+   * La réserve exigée par la note d'intégration : le SVG est détouré au plus
+   * juste, sans marge. Sous cette largeur, le bloc paraît écrasé contre le bord.
+   */
+  .marque {
+    display: block;
+    width: clamp(9rem, 18vw, 13.5rem);
+    color: var(--ink);
+  }
+
+  .baseline {
+    margin: var(--space-6) 0 0;
+    max-width: 32ch;
     color: var(--text-muted);
-    font-size: 1.125rem;
+    font-size: clamp(1rem, 2vw, 1.125rem);
+    line-height: 1.6;
   }
 
-  .empty {
-    color: var(--text-muted);
-    line-height: 1.8;
-  }
-  .empty code {
-    font-family: var(--font-mono);
-    font-size: 0.875em;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 0.1em 0.4em;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
-    gap: var(--space-6);
+  .sommaire {
     margin: 0;
     padding: 0;
     list-style: none;
+    counter-reset: none;
   }
 
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    transition:
-      transform var(--transition),
-      box-shadow var(--transition),
-      border-color var(--transition);
-  }
-  .card:hover,
-  .card:focus-within {
-    transform: translateY(-3px);
-    border-color: var(--accent);
-    box-shadow: var(--shadow-card);
+  .entree {
+    position: relative;
   }
 
-  .card a {
-    display: block;
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .cover {
-    display: block;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    background: var(--bg);
-  }
-  .cover--placeholder {
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--accent) 22%, var(--surface)),
-      color-mix(in srgb, var(--accent) 6%, var(--surface))
-    );
-  }
-
-  .body {
-    padding: var(--space-4) var(--space-5, 1.25rem) var(--space-5, 1.25rem);
-  }
-  .body h2 {
+  /*
+   * Flex plutôt que grille : la vignette est facultative, et une grille à
+   * colonnes fixes ferait passer la date à la ligne quand elle manque.
+   */
+  .lien {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    margin: 0 0 var(--space-1);
-    font-size: 1.0625rem;
-    letter-spacing: -0.01em;
-  }
-  .body p {
-    margin: 0 0 var(--space-3);
-    color: var(--text-muted);
-    font-size: 0.9375rem;
-  }
-  .body time {
-    color: var(--text-muted);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    gap: var(--space-4);
+    padding: var(--space-6) var(--space-4);
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition);
   }
 
-  .draft {
+  /* La teinte du monde du jeu, entrouverte. 4 %, pas plus. */
+  .lien:hover,
+  .lien:focus-visible {
+    background-color: color-mix(in srgb, var(--accent) 5%, transparent);
+  }
+
+  .numero {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  /*
+   * La pastille : le même cercle que le « o » du logo, décliné. C'est l'objet
+   * qui tient l'identité ensemble — ne pas le remplacer par une puce de liste.
+   */
+  .pastille {
+    flex: none;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--red);
+    transition:
+      transform var(--transition),
+      background-color var(--transition);
+  }
+  .lien:hover .pastille,
+  .lien:focus-visible .pastille {
+    transform: scale(1.45);
+    background: var(--accent);
+  }
+
+  .corps {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+  }
+
+  .nom {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: clamp(1.375rem, 3.4vw, 2rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .blurb {
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  .brouillon {
     padding: 1px var(--space-2);
     border: 1px dashed var(--border);
     border-radius: 999px;
@@ -162,5 +286,86 @@ const dateFormat = new Intl.DateTimeFormat('fr-FR', { month: 'short', year: 'num
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: var(--text-muted);
+  }
+
+  .vignette {
+    flex: none;
+    width: 7.5rem;
+    height: auto;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    opacity: 0;
+    transform: translateX(var(--space-3));
+    transition:
+      opacity var(--transition),
+      transform var(--transition);
+  }
+  .lien:hover .vignette,
+  .lien:focus-visible .vignette {
+    opacity: 1;
+    transform: none;
+  }
+
+  .date {
+    flex: none;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /*
+   * Le filet. Il court sous chaque ligne en encre pâle, et se remplit dans la
+   * couleur du jeu au survol — de la gauche vers la droite, comme une lecture.
+   */
+  .filet {
+    display: block;
+    height: 1px;
+    background: var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .filet::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .entree:has(.lien:hover) .filet::after,
+  .entree:has(.lien:focus-visible) .filet::after {
+    transform: scaleX(1);
+  }
+
+  .vide {
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+  .vide code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.1em 0.4em;
+  }
+
+  /*
+   * Sur petit écran, la vignette et le numéro sortent : il ne reste que la
+   * pastille, le nom et la phrase. Le sommaire tient sans eux, c'est sa force.
+   */
+  @media (max-width: 40rem) {
+    .lien {
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-2);
+    }
+    .numero,
+    .vignette,
+    .date {
+      display: none;
+    }
   }
 </style>

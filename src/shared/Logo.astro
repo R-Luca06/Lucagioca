@@ -1,0 +1,38 @@
+---
+import markup from './assets/lucagioca.svg?raw';
+
+/**
+ * Le logo, inséré en ligne plutôt que servi comme image.
+ *
+ * C'est ce qui permet au mot de prendre `currentColor` et à la pastille de
+ * suivre `--red` : un seul fichier couvre les deux thèmes, sans bascule
+ * d'image ni clignotement au chargement. Et le `<circle>` reste atteignable
+ * par le script d'ouverture, ce qu'un `<img>` interdirait.
+ */
+interface Props {
+  /** Classe posée sur l'enveloppe, pour la taille et le placement. */
+  class?: string | undefined;
+}
+
+const { class: className } = Astro.props;
+---
+
+<span class:list={['logo', className]} set:html={markup} />
+
+<style>
+  .logo {
+    display: block;
+  }
+
+  .logo :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* La pastille est le seul élément animé du logo : on lui donne son centre. */
+  .logo :global(.logo-pastille) {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+</style>

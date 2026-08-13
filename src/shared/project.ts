@@ -43,8 +43,35 @@ export const projectSchema = z.object({
   /** Chemin d'image relatif à `public/`, ex. `/covers/mon-jeu.webp`. */
   cover: z.string().startsWith('/').optional(),
 
+  /**
+   * Vignette légère, montrée au survol sur l'accueil.
+   *
+   * Séparée de `cover` à dessein : une image Open Graph fait 1200 × 630 et pèse
+   * des centaines de kilo-octets, ce qui est absurde pour une décoration au
+   * survol. Sans vignette, la ligne du sommaire n'en affiche simplement pas.
+   */
+  thumb: z.string().startsWith('/').optional(),
+
   /** À `true` si le jeu exige souris/clavier — on avertit alors sur mobile. */
   needsPointer: z.boolean().default(false),
+
+  /**
+   * Attributions, rendues en pied de page par `ProjectLayout`.
+   *
+   * Ce champ n'est pas de la politesse. Les licences Creative Commons en BY
+   * exigent que le crédit soit **visible depuis le site**, pas seulement
+   * consigné dans le dépôt : un projet qui emprunte un son, une police ou un
+   * jeu de données sous BY doit remplir cette liste, sinon il enfreint sa
+   * licence dès sa mise en ligne.
+   */
+  credits: z
+    .array(
+      z.object({
+        label: z.string().min(1),
+        url: z.url().optional(),
+      }),
+    )
+    .default([]),
 });
 
 export type Project = z.output<typeof projectSchema>;

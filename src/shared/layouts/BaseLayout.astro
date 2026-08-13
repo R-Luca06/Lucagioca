@@ -24,7 +24,14 @@ const ogImage = image ? new URL(image, Astro.site) : undefined;
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+
+    {/* L'`.ico` en premier : certains navigateurs anciens ignorent la suite.
+        Il ne contient qu'une image 16×16, d'où la taille déclarée. */}
+    <link rel="icon" href="/favicon.ico" sizes="16x16" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#f2efe7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1b1b18" media="(prefers-color-scheme: dark)" />
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
