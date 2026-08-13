@@ -1,0 +1,16 @@
+# En-têtes servis par Cloudflare Pages. Ce fichier est copié tel quel dans dist/.
+
+# Tout ce qu'Astro émet dans /_astro/ porte un condensé du contenu dans son nom :
+# polices, feuilles de style, îles React. Le fichier change ⇒ son nom change,
+# donc on peut le mettre en cache pour toujours sans jamais servir de version
+# périmée. Sans cette ligne, la police est retéléchargée bien trop souvent.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Les images de partage et vignettes changent, elles, sans changer de nom.
+/og/*
+  Cache-Control: public, max-age=86400
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

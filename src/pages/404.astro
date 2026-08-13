@@ -1,0 +1,74 @@
+---
+import Logo from '@/shared/Logo.astro';
+import BaseLayout from '@/shared/layouts/BaseLayout.astro';
+import '@/shared/styles/bricolage.css';
+
+/**
+ * Cloudflare Pages sert automatiquement ce fichier sur toute URL inconnue d'un
+ * site statique. Rien à configurer : il suffit qu'il existe.
+ */
+---
+
+<BaseLayout title="Page introuvable — lucagioca" description="Cette page n'existe pas.">
+  <main class="perdu">
+    <a class="retour-marque" href="/" aria-label="Retour à l'accueil">
+      <span class="marque"><Logo /></span>
+    </a>
+
+    <p class="code" aria-hidden="true">404</p>
+    <h1>Cette page n'existe pas.</h1>
+    <p class="aide">
+      Un lien périmé, une adresse mal recopiée, ou une expérience qui n'a jamais vu le jour.
+      <a href="/">Retourner au sommaire</a>.
+    </p>
+  </main>
+</BaseLayout>
+
+<style>
+  .perdu {
+    max-width: 62rem;
+    margin: 0 auto;
+    padding: clamp(var(--space-12), 12vh, var(--space-16)) var(--space-6);
+    font-family: "Bricolage Grotesque", var(--font-sans);
+  }
+
+  .retour-marque {
+    display: inline-block;
+    color: var(--ink);
+  }
+  .marque {
+    display: block;
+    width: clamp(7rem, 14vw, 10rem);
+  }
+
+  .code {
+    margin: clamp(var(--space-12), 10vh, var(--space-16)) 0 var(--space-2);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+
+  h1 {
+    margin: 0 0 var(--space-4);
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .aide {
+    margin: 0;
+    max-width: 42ch;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .aide a {
+    color: var(--text);
+    text-decoration-color: var(--red);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .aide a:hover {
+    color: var(--red);
+  }
+</style>
