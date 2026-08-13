@@ -59,6 +59,7 @@ Le projet est alors accessible sur `/p/mon-jeu`, listé sur l'accueil dès que
 | `pnpm preview` | Sert le build de prod localement |
 | `pnpm lint` / `pnpm format` | Biome, vérification / correction |
 | `pnpm typecheck` | `astro check` |
+| `pnpm test` | Tests unitaires (Vitest), `pnpm test:watch` en continu |
 | `pnpm test:e2e` | Playwright (nécessite un `build` préalable) |
 | `pnpm budget` | Vérifie le poids JS |
 | `pnpm verify` | Toute la chaîne — à lancer avant de pousser |

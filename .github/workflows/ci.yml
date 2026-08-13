@@ -30,6 +30,11 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      # Avant le build : c'est l'étape la plus rapide à échouer, et la plus
+      # précise quand elle échoue.
+      - name: Tests unitaires
+        run: pnpm test
+
       - name: Build
         run: pnpm build
 

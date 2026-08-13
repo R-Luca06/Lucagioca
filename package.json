@@ -13,9 +13,11 @@
     "typecheck": "astro check",
     "lint": "biome check .",
     "format": "biome check --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:e2e": "playwright test",
     "budget": "node scripts/check-budget.mjs",
-    "verify": "pnpm lint && pnpm typecheck && pnpm build && pnpm budget && pnpm test:e2e"
+    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm budget && pnpm test:e2e"
   },
   "dependencies": {
     "@astrojs/react": "^4.3.0",
@@ -31,6 +33,7 @@
     "@types/node": "^26.2.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.10"
   }
 }
