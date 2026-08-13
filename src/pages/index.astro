@@ -1,10 +1,14 @@
 ---
 import { listedProjects } from '@/registry';
+import bricolage400 from '@/shared/assets/bricolage-grotesque-latin-400.woff2?url';
+import bricolage600 from '@/shared/assets/bricolage-grotesque-latin-600.woff2?url';
 import Logo from '@/shared/Logo.astro';
 import BaseLayout from '@/shared/layouts/BaseLayout.astro';
+import '@/shared/styles/bricolage.css';
 import ThemeToggle from '@/shared/ThemeToggle.astro';
 
 const projects = listedProjects;
+const annee = new Date().getFullYear();
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { month: 'short', year: 'numeric' });
 const numero = (index: number) => String(index + 1).padStart(2, '0');
@@ -16,21 +20,10 @@ const numero = (index: number) => String(index + 1).padStart(2, '0');
   image="/og/accueil.png"
 >
   <Fragment slot="head">
-    {/*
-      Armé AVANT la peinture, sinon le sommaire s'affiche puis disparaît pour
-      être rejoué — pire que pas d'animation du tout. Sans JavaScript ou en
-      mouvement réduit, rien n'est armé et tout est visible d'emblée : le
-      contenu ne dépend jamais de la mise en scène.
-    */}
-    <script is:inline>
-      try {
-        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          document.documentElement.dataset.ouverture = 'armee';
-        }
-      } catch {
-        /* Rien à armer : la page s'affiche telle quelle. */
-      }
-    </script>
+    {/* Les titres sont le premier chose qu'on lit : autant ne pas les faire
+        clignoter d'une police à l'autre. */}
+    <link rel="preload" as="font" type="font/woff2" href={bricolage600} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={bricolage400} crossorigin />
   </Fragment>
 
   <main class="accueil">
@@ -44,7 +37,10 @@ const numero = (index: number) => String(index + 1).padStart(2, '0');
               élément rendu par `Logo.astro`, qui porte sa propre portée. */}
           <span class="marque"><Logo /></span>
         </h1>
-        <p class="baseline">Une collection de petites expériences interactives.</p>
+        <p class="baseline">
+          Des petites expériences interactives. Chacune essaie de faire sentir quelque chose
+          qu'un chiffre ne dit pas.
+        </p>
       </div>
 
       {/*
@@ -65,7 +61,7 @@ const numero = (index: number) => String(index + 1).padStart(2, '0');
       ) : (
         <ol class="sommaire">
           {projects.map((project, index) => (
-            <li class="entree" style={`--accent: ${project.accent}; --rang: ${index};`}>
+            <li class="entree" style={`--accent: ${project.accent};`}>
               <a class="lien" href={`/p/${project.slug}`}>
                 <span class="numero" aria-hidden="true">
                   {numero(index)}
@@ -102,89 +98,135 @@ const numero = (index: number) => String(index + 1).padStart(2, '0');
         </ol>
       )
     }
+
+    <footer class="pied">
+      <p class="signe">
+        Fait par Luca, une expérience à la fois. Le code est{' '}
+        {/* Sur une seule ligne : un retour avant le point le décollerait du lien. */}
+        <a href="https://github.com/R-Luca06/Lucagioca" rel="noopener noreferrer" target="_blank">ouvert</a>.
+      </p>
+      <p class="mentions">
+        Composé en Bricolage Grotesque, de Mathieu Triay — licence SIL Open Font.
+        <span class="annee">{annee}</span>
+      </p>
+    </footer>
   </main>
 </BaseLayout>
 
 <script>
   /**
-   * L'ouverture : le « o » quitte le logo et va chercher le sommaire.
+   * Le « o » du logo sert de pointeur.
    *
-   * Le point ne se contente pas de se déplacer — c'est lui qui **amène** le
-   * contenu. Une pastille qui traverse une page déjà complète n'ouvre rien, elle
-   * bouge après coup ; ici les lignes n'existent qu'une fois qu'il est arrivé.
+   * Au survol — ou au focus clavier — la pastille rouge quitte le mot pour
+   * venir désigner la ligne regardée, et rentre chez elle quand on s'en va.
+   * Le logo n'est donc jamais amputé durablement, et l'animation se rejoue
+   * autant de fois qu'on la provoque, au lieu de passer une fois au chargement
+   * pendant qu'on regarde ailleurs.
    *
-   * Le « o » ne revient pas : le logo garde son creux. C'est voulu, la lettre
-   * est partie travailler dans la liste.
-   *
-   * La traversée est confiée à une pastille flottante plutôt qu'au `<circle>`
+   * La traversée est confiée à une doublure flottante plutôt qu'au `<circle>`
    * lui-même : un SVG rogne ce qui sort de sa `viewBox`, le cercle disparaîtrait
    * au premier pixel franchi. L'échange des deux est simultané, donc invisible.
+   *
+   * Rien ici n'est nécessaire à la lecture : sans script, ou en mouvement
+   * réduit, les puces sont en place et changent simplement de couleur au survol.
    */
-  const racine = document.documentElement;
+  const cercle = document.querySelector<SVGCircleElement>('.logo-pastille');
+  const sommaire = document.querySelector<HTMLElement>('.sommaire');
+  const mouvementReduit = matchMedia('(prefers-reduced-motion: reduce)');
 
-  /** Tout révéler. Idempotent : appelable en fin d'animation comme en secours. */
-  const reveler = () => {
-    delete racine.dataset.ouverture;
-  };
+  if (cercle && sommaire && !mouvementReduit.matches) {
+    let doublure: HTMLElement | null = null;
+    let cible: HTMLElement | null = null;
 
-  if (racine.dataset.ouverture === 'armee') {
-    // Filet de sécurité : si quoi que ce soit échoue ici, la page ne doit pas
-    // rester vide. Le contenu se montre au plus tard, quoi qu'il arrive.
-    const secours = setTimeout(reveler, 2500);
+    /**
+     * Repositionne la doublure. Les coordonnées sont relues à chaque appel :
+     * le logo et les lignes bougent ensemble au défilement, donc les recalculer
+     * suffit à faire suivre la pastille sans la faire sauter.
+     */
+    const placer = () => {
+      if (!doublure) return;
+      const maison = cercle.getBoundingClientRect();
+      doublure.style.left = `${maison.left}px`;
+      doublure.style.top = `${maison.top}px`;
+      doublure.style.width = `${maison.width}px`;
+      doublure.style.height = `${maison.height}px`;
 
-    const source = document.querySelector<SVGCircleElement>('.logo-pastille');
-    const cible = document.querySelector<HTMLElement>('.entree:first-child .pastille');
-    const depart = source?.getBoundingClientRect();
-    const arrivee = cible?.getBoundingClientRect();
+      if (!cible) {
+        doublure.style.transform = 'none';
+        return;
+      }
+      const arrivee = cible.getBoundingClientRect();
+      const dx = arrivee.left - maison.left + (arrivee.width - maison.width) / 2;
+      const dy = arrivee.top - maison.top + (arrivee.height - maison.height) / 2;
+      doublure.style.transform =
+        `translate(${dx}px, ${dy}px) scale(${arrivee.width / maison.width})`;
+    };
 
-    if (source && depart && arrivee && depart.width > 0 && arrivee.width > 0) {
-      const voyageuse = document.createElement('div');
-      voyageuse.className = 'voyageuse';
-      voyageuse.style.width = `${depart.width}px`;
-      voyageuse.style.height = `${depart.height}px`;
-      voyageuse.style.left = `${depart.left}px`;
-      voyageuse.style.top = `${depart.top}px`;
-      document.body.append(voyageuse);
+    const viser = (puce: HTMLElement | null) => {
+      cible = puce;
 
-      // L'échange : le cercle du logo s'efface à l'instant où la doublure paraît.
-      source.style.opacity = '0';
+      if (puce && !doublure) {
+        doublure = document.createElement('div');
+        doublure.className = 'voyageuse';
+        document.body.append(doublure);
+        // Posée chez elle d'abord, puis relancée à la frame suivante : sans ce
+        // temps mort, le navigateur fusionne les deux états et rien ne bouge.
+        placer();
+        cercle.style.opacity = '0';
+        cible = puce;
+        requestAnimationFrame(placer);
+        return;
+      }
+      placer();
+    };
 
-      const dx = arrivee.left - depart.left + (arrivee.width - depart.width) / 2;
-      const dy = arrivee.top - depart.top + (arrivee.height - depart.height) / 2;
-
-      const trajet = voyageuse.animate(
-        [
-          { transform: 'none' },
-          // Elle prend de la hauteur avant de redescendre : une chute droite
-          // ferait mécanique, ce petit arc lui donne du poids.
-          { transform: `translate(${dx * 0.55}px, ${dy * 0.28}px) scale(0.72)`, offset: 0.45 },
-          { transform: `translate(${dx}px, ${dy}px) scale(${arrivee.width / depart.width})` },
-        ],
-        { duration: 780, delay: 260, easing: 'cubic-bezier(0.65, 0, 0.35, 1)', fill: 'both' },
+    /** Retour à la maison, puis effacement une fois la doublure rentrée. */
+    const rentrer = () => {
+      if (!doublure) return;
+      const partante = doublure;
+      viser(null);
+      partante.addEventListener(
+        'transitionend',
+        () => {
+          // Une nouvelle cible a pu être visée entre-temps : on ne démonte que
+          // si la pastille est bel et bien revenue au repos.
+          if (cible === null && doublure === partante) {
+            cercle.style.opacity = '';
+            partante.remove();
+            doublure = null;
+          }
+        },
+        { once: true },
       );
+    };
 
-      trajet.addEventListener('finish', () => {
-        clearTimeout(secours);
-        reveler();
-        // Recouvrement volontaire : la doublure s'efface pendant que la vraie
-        // puce paraît, on ne voit donc jamais de trou.
-        voyageuse
-          .animate([{ opacity: 1 }, { opacity: 0 }], { duration: 220, fill: 'forwards' })
-          .addEventListener('finish', () => voyageuse.remove());
-      });
-    } else {
-      clearTimeout(secours);
-      reveler();
+    for (const lien of sommaire.querySelectorAll<HTMLElement>('.lien')) {
+      const puce = lien.querySelector<HTMLElement>('.pastille');
+      if (!puce) continue;
+      lien.addEventListener('pointerenter', () => viser(puce));
+      lien.addEventListener('focus', () => viser(puce));
+      lien.addEventListener('blur', rentrer);
     }
+    sommaire.addEventListener('pointerleave', rentrer);
+
+    // Le défilement ne doit pas décrocher la pastille de sa ligne.
+    addEventListener('scroll', placer, { passive: true });
+    addEventListener('resize', placer);
   }
 </script>
 
 <style>
+  /*
+   * La police du logo prend toute la page, et pas seulement les titres : c'est
+   * le voisinage entre le mot vectorisé et le texte système qui sonnait faux.
+   * Elle s'arrête ici — la page d'un jeu n'a aucune raison de la télécharger.
+   */
   .accueil {
     position: relative;
     max-width: 62rem;
     margin: 0 auto;
-    padding: clamp(var(--space-12), 12vh, var(--space-16)) var(--space-6) var(--space-16);
+    padding: clamp(var(--space-12), 12vh, var(--space-16)) var(--space-6) var(--space-12);
+    font-family: "Bricolage Grotesque", var(--font-sans);
   }
 
   /*
@@ -194,11 +236,28 @@ const numero = (index: number) => String(index + 1).padStart(2, '0');
    */
   .grain {
     position: fixed;
-    inset: 0;
+    /* Débordement volontaire : la dérive ne doit jamais découvrir un bord. */
+    inset: -12px;
     z-index: 0;
     pointer-events: none;
     opacity: 0.04;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: derive 24s ease-in-out infinite;
+  }
+
+  /*
+   * Le papier respire. Six pixels sur vingt-quatre secondes : imperceptible si
+   * on la cherche, sensible si on reste. Le garde-fou global de `tokens.css`
+   * neutralise l'animation en `prefers-reduced-motion`.
+   */
+  @keyframes derive {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(-6px, 4px, 0);
+    }
   }
 
   /* Sur presque-noir, le même grain vire à la neige de téléviseur. */
@@ -213,9 +272,46 @@ const numero = (index: number) => String(index + 1).padStart(2, '0');
 
   .entete,
   .sommaire,
-  .vide {
+  .vide,
+  .pied {
     position: relative;
     z-index: 1;
+  }
+
+  /*
+   * Le pied ferme la page. Sans lui, le sommaire s'arrêtait net sur du vide, et
+   * un site sans personne derrière n'a pas d'âme — c'était le vrai manque.
+   */
+  .pied {
+    margin-top: clamp(var(--space-16), 18vh, 12rem);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-6);
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+  .pied p {
+    margin: 0;
+  }
+  .pied a {
+    color: var(--text);
+    text-decoration-color: var(--red);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  .pied a:hover {
+    color: var(--red);
+  }
+  .mentions {
+    display: flex;
+    gap: var(--space-4);
+  }
+  .annee {
+    font-variant-numeric: tabular-nums;
   }
 
   .entete {
@@ -265,43 +361,19 @@ const numero = (index: number) => String(index + 1).padStart(2, '0');
   }
 
   /*
-   * La mise en scène d'ouverture.
+   * La doublure du « o », qui voyage hors de la `viewBox` du logo.
    *
-   * Tout est piloté par un seul attribut posé sur `<html>` avant la peinture, et
-   * retiré à l'atterrissage de la pastille : les lignes arrivent alors en
-   * cascade, décalées par leur rang. Retirer l'attribut suffit à tout révéler,
-   * ce qui rend le secours du script trivial — et l'état par défaut du CSS,
-   * celui que voit un visiteur sans JavaScript, est la page complète.
+   * `transform` porte tout le déplacement : c'est la seule propriété que le
+   * navigateur sait animer sans repeindre. `left`/`top` ne servent qu'au
+   * recalage au défilement, et ne sont donc pas transitionnés.
    */
-  .entree > * {
-    transition:
-      opacity 460ms ease-out calc(var(--rang, 0) * 90ms + 60ms),
-      transform 460ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--rang, 0) * 90ms + 60ms);
-  }
-  .filet {
-    transform-origin: left;
-    transition:
-      transform 620ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--rang, 0) * 90ms + 60ms),
-      background-color var(--transition);
-  }
-
-  :global(:root[data-ouverture='armee']) .entree > * {
-    opacity: 0;
-    transform: translateY(8px);
-    transition-delay: 0ms;
-  }
-  :global(:root[data-ouverture='armee']) .filet {
-    transform: scaleX(0);
-    transition-delay: 0ms;
-  }
-
-  /* La doublure qui traverse la page, hors de la `viewBox` du logo. */
   :global(.voyageuse) {
     position: fixed;
     z-index: 50;
     border-radius: 50%;
     background: var(--red);
     pointer-events: none;
+    transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   /*
@@ -334,23 +406,24 @@ const numero = (index: number) => String(index + 1).padStart(2, '0');
   }
 
   /*
-   * La pastille : le même cercle que le « o » du logo, décliné. C'est l'objet
-   * qui tient l'identité ensemble — ne pas le remplacer par une puce de liste.
+   * La puce : le même cercle que le « o » du logo, décliné. Pâle au repos —
+   * c'est la pastille rouge venue du logo qui vient s'y poser au survol, et
+   * deux rouges superposés ne diraient rien.
+   *
+   * Le changement de couleur reste le repli de ceux qui n'auront pas le
+   * voyage : sans script, ou en mouvement réduit, la puce rougit sur place.
    */
   .pastille {
     flex: none;
     width: 0.6rem;
     height: 0.6rem;
     border-radius: 50%;
-    background: var(--red);
-    transition:
-      transform var(--transition),
-      background-color var(--transition);
+    background: color-mix(in srgb, var(--ink) 22%, var(--paper));
+    transition: background-color var(--transition);
   }
   .lien:hover .pastille,
   .lien:focus-visible .pastille {
-    transform: scale(1.45);
-    background: var(--accent);
+    background: var(--red);
   }
 
   .corps {
