@@ -1,0 +1,35 @@
+/*
+ * Bricolage Grotesque — la police du logo, pour le texte qui l'entoure.
+ *
+ * Le logo est vectorisé, donc il n'a besoin d'aucun fichier ; c'est la page
+ * autour de lui qui tombait sinon sur la police système, et le voisinage se
+ * sentait sans qu'on sache le nommer.
+ *
+ * Deux graisses statiques plutôt que la fonte variable : 22 ko chacune contre
+ * 40 ko pour la variable à deux axes, et on n'utilise de toute façon que ces
+ * deux valeurs. Sous-ensemble latin uniquement.
+ *
+ * Cette feuille n'est PAS importée par `tokens.css` : elle n'est chargée que
+ * par les pages qui la demandent. Faire payer 44 ko à la page d'un jeu pour
+ * un lien de retour et un pied de page n'aurait pas de sens.
+ *
+ * Licence SIL Open Font 1.1 — le texte intégral est dans
+ * `src/shared/assets/bricolage-grotesque-OFL.txt`, et sa présence dans le
+ * dépôt est une obligation de la licence, pas une politesse.
+ */
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("../assets/bricolage-grotesque-latin-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("../assets/bricolage-grotesque-latin-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
