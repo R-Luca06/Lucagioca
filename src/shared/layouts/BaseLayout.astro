@@ -41,6 +41,31 @@ const ogImage = image ? new URL(image, Astro.site) : undefined;
     <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
 
     <meta name="generator" content={Astro.generator} />
+
+    {/*
+      Le choix de thème, appliqué AVANT la peinture.
+
+      `is:inline` est obligatoire : un script de module serait différé, et le
+      visiteur qui a choisi le sombre verrait le crème un dixième de seconde
+      avant la bascule. C'est aussi pourquoi on lit `localStorage` en direct
+      plutôt que par `createStore()` — charger Zod avant le premier pixel pour
+      valider une chaîne de cinq lettres serait un mauvais échange. La règle 2
+      de CLAUDE.md vise l'état des jeux, pas ce réglage-ci.
+
+      Sans valeur enregistrée, aucun attribut n'est posé : la préférence
+      système continue de décider, et elle reste suivie en direct.
+    */}
+    <script is:inline>
+      try {
+        const choix = localStorage.getItem('lucagioca:theme');
+        if (choix === 'dark' || choix === 'light') {
+          document.documentElement.dataset.theme = choix;
+        }
+      } catch {
+        /* Cookies bloqués : on suit le système, sans rien casser. */
+      }
+    </script>
+
     <slot name="head" />
   </head>
   <body style={accent ? `--accent: ${accent};` : undefined}>

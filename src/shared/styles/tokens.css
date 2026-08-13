@@ -23,6 +23,9 @@
   --ink: #1b1b18;
   --red: #e8412a;
 
+  /* Barres de défilement et contrôles natifs suivent le thème choisi. */
+  color-scheme: light dark;
+
   /* Espacement : échelle unique, pas de valeurs arbitraires ailleurs. */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -72,10 +75,17 @@
 }
 
 :root[data-theme="dark"] {
+  color-scheme: dark;
+
   --paper: #1b1b18;
   --ink: #f2efe7;
   --surface: color-mix(in srgb, var(--paper) 92%, #ffffff);
   --shadow-card: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 30%);
+}
+
+/* Le clair explicitement demandé, même si le système préfère le sombre. */
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 *,
