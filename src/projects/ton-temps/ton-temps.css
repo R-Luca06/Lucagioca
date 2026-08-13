@@ -748,6 +748,46 @@ body:has(.ton-temps) {
   color: var(--phosphore-faible);
 }
 
+/* --- Les rayons du catalogue -------------------------------------------------- */
+
+/*
+ * Un cran sous `.section-titre`, qui reste en ambre et souligné d'un double
+ * filet : les rayons se contentent du phosphore et d'un trait simple. Sans
+ * cette hiérarchie, cinquante lignes se lisent comme une seule liste, et la
+ * distinction que porte le jeu — ce qui coûte selon le pays contre ce qui coûte
+ * pareil pour tout le monde — se perd dans le défilement.
+ */
+.ton-temps .rayon {
+  margin-top: var(--space-8);
+}
+
+.ton-temps .rayon-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--filet);
+}
+
+.ton-temps .rayon-titre {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--phosphore);
+}
+
+.ton-temps .rayon-note {
+  flex: 1;
+  min-width: 24ch;
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--phosphore-faible);
+}
+
 /* --- Les lignes d'activité --------------------------------------------------- */
 
 .ton-temps .grille {
@@ -757,6 +797,16 @@ body:has(.ton-temps) {
   padding: 0;
   list-style: none;
   border-top: 1px solid var(--filet);
+}
+
+/*
+ * Le filet du rayon fait déjà office de bord haut : deux traits feraient double.
+ * Déclaré APRÈS la règle de base — l'inverse déclenche `noDescendingSpecificity`,
+ * et surtout ne s'appliquerait pas de façon fiable.
+ */
+.ton-temps .rayon .grille {
+  margin-top: 0;
+  border-top: 0;
 }
 
 .ton-temps .ligne {

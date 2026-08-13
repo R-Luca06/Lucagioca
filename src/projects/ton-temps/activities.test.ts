@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   type Activity,
+  activitiesByGroup,
   allActivities,
   basketHours,
   byActivityId,
+  groups,
+  habits,
   hoursFor,
   lifetimeHours,
   mandatoryIds,
@@ -247,5 +250,71 @@ describe('invariants du catalogue', () => {
       const { fromAge, toAge } = a.cost;
       if (fromAge !== undefined && toAge !== undefined) expect(toAge).toBeGreaterThan(fromAge);
     }
+  });
+});
+
+describe('rangement par rayon', () => {
+  it('range chaque activité, sans en perdre ni en dupliquer', () => {
+    const rangees = activitiesByGroup.flatMap((g) => g.activities);
+    expect(rangees).toHaveLength(allActivities.length);
+    expect(new Set(rangees.map((a) => a.id)).size).toBe(allActivities.length);
+  });
+
+  it('ne laisse aucun rayon vide — un titre sans ligne dessous ne dit rien', () => {
+    for (const rayon of activitiesByGroup) {
+      expect(rayon.activities.length, `rayon « ${rayon.label} » vide`).toBeGreaterThan(0);
+    }
+  });
+
+  it('n’attribue aucune activité à un rayon qui n’existe pas', () => {
+    const connus = new Set(groups.map((g) => g.id));
+    for (const a of allActivities) expect(connus).toContain(a.group);
+  });
+
+  it('réserve le rayon « habitudes » aux coûts qui dépendent du pays', () => {
+    // C'est la distinction que le jeu veut faire sentir : la ranger de travers
+    // reviendrait à annoncer un coût variable là où il est fixe, et inversement.
+    for (const a of habits) expect(a.group).toBe('habitudes');
+    for (const a of pursuits) expect(a.group).not.toBe('habitudes');
+    for (const a of allActivities) {
+      expect(a.group === 'habitudes').toBe(a.cost.kind !== 'once');
+    }
+  });
+});
+
+describe('densité du catalogue', () => {
+  /**
+   * La propriété la plus importante du catalogue, et elle est émergente : il
+   * est assez dense pour qu'une vie brève ne puisse PAS tout contenir, et
+   * assez mesuré pour qu'une vie longue y arrive de justesse.
+   *
+   * C'est la thèse du jeu, exprimée en arithmétique plutôt qu'en discours. La
+   * casser en ajoutant des activités reviendrait à la casser dans le propos :
+   * si tout le monde peut tout, il n'y a plus d'inégalité à sentir ; si
+   * personne ne peut rien, il n'y a plus de contraste.
+   */
+  it('laisse une vie longue tout contenir — de justesse', () => {
+    const tout = Object.fromEntries(allActivities.map((a) => [a.id, 1]));
+    const budget = lifetimeHours(84.6);
+    expect(basketHours(tout, 84.6)).toBeLessThan(budget);
+    expect(basketHours(tout, 84.6)).toBeGreaterThan(budget * 0.9);
+  });
+
+  it('interdit à une vie brève de tout contenir', () => {
+    const tout = Object.fromEntries(allActivities.map((a) => [a.id, 1]));
+    expect(basketHours(tout, 54.6)).toBeGreaterThan(lifetimeHours(54.6));
+  });
+
+  it('couvre plusieurs ordres de grandeur, pour que translate ait à dire', () => {
+    const couts = pursuits.map((p) => p.cost.hours).sort((a, b) => a - b);
+    const plusPetit = couts[0] ?? 0;
+    const plusGrand = couts[couts.length - 1] ?? 0;
+    expect(plusPetit).toBeLessThan(20);
+    expect(plusGrand / Math.max(plusPetit, 1)).toBeGreaterThan(500);
+  });
+
+  it('propose assez de choix pour que le sommeil ne soit pas la seule ligne', () => {
+    expect(pursuits.length).toBeGreaterThanOrEqual(25);
+    expect(habits.length).toBeGreaterThanOrEqual(10);
   });
 });

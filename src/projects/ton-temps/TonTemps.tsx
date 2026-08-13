@@ -4,7 +4,7 @@ import { createStore } from '@/shared/engine/storage';
 import { useGameLoop, usePrefersReducedMotion } from '@/shared/engine/useGameLoop';
 import {
   type Activity,
-  allActivities,
+  activitiesByGroup,
   type Basket,
   basketHours,
   byActivityId,
@@ -707,44 +707,62 @@ function Depense({
       </header>
 
       <h2 className="section-titre">Ce que tu fais de ta vie</h2>
-      <ul className="grille">
-        {allActivities.map((activity) => {
-          const cost = hoursFor(activity, country.years);
-          const quantity = basket[activity.id] ?? 0;
-          const poids = budget > 0 ? (cost / budget) * 100 : 0;
-          const classes = ['ligne'];
-          if (quantity > 0) classes.push('prise');
-          if (activity.mandatory) classes.push('subie');
-          return (
-            <li key={activity.id} className={classes.join(' ')}>
-              <div className="ligne-tete">
-                <span className="ligne-marque" aria-hidden="true">
-                  &gt;
-                </span>
-                <h3 className="activite-titre">{activity.label}</h3>
-                <span className="conduite" aria-hidden="true" />
-                <p className="activite-cout">
-                  {hours(cost)} h
-                  {poids >= 1 && <span className="activite-part"> · {Math.round(poids)} %</span>}
-                </p>
-              </div>
-              <p className="ligne-note">
-                {activity.detail ? `${activity.detail} — ` : ''}
-                <span className="activite-source">{activity.source}</span>
-              </p>
-              <div className="ligne-controle">
-                <Controle
-                  activity={activity}
-                  quantity={quantity}
-                  cost={cost}
-                  remaining={remaining}
-                  onSet={(next) => set(activity.id, next)}
-                />
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+
+      {/*
+        Le catalogue est rangé par rayon. À dix-huit lignes une liste plate
+        passait ; à cinquante, elle noie le joueur — et surtout elle mélangeait
+        ce qui coûte selon le pays et ce qui coûte pareil pour tout le monde,
+        qui est justement la distinction que le jeu veut faire sentir.
+      */}
+      {activitiesByGroup.map((groupe) => (
+        <section key={groupe.id} className="rayon">
+          <header className="rayon-tete">
+            <h3 className="rayon-titre">{groupe.label}</h3>
+            <p className="rayon-note">{groupe.note}</p>
+          </header>
+
+          <ul className="grille">
+            {groupe.activities.map((activity) => {
+              const cost = hoursFor(activity, country.years);
+              const quantity = basket[activity.id] ?? 0;
+              const poids = budget > 0 ? (cost / budget) * 100 : 0;
+              const classes = ['ligne'];
+              if (quantity > 0) classes.push('prise');
+              if (activity.mandatory) classes.push('subie');
+              return (
+                <li key={activity.id} className={classes.join(' ')}>
+                  <div className="ligne-tete">
+                    <span className="ligne-marque" aria-hidden="true">
+                      &gt;
+                    </span>
+                    <h4 className="activite-titre">{activity.label}</h4>
+                    <span className="conduite" aria-hidden="true" />
+                    <p className="activite-cout">
+                      {hours(cost)} h
+                      {poids >= 1 && (
+                        <span className="activite-part"> · {Math.round(poids)} %</span>
+                      )}
+                    </p>
+                  </div>
+                  <p className="ligne-note">
+                    {activity.detail ? `${activity.detail} — ` : ''}
+                    <span className="activite-source">{activity.source}</span>
+                  </p>
+                  <div className="ligne-controle">
+                    <Controle
+                      activity={activity}
+                      quantity={quantity}
+                      cost={cost}
+                      remaining={remaining}
+                      onSet={(next) => set(activity.id, next)}
+                    />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
     </section>
   );
 }
