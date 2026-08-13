@@ -2,6 +2,7 @@
 import { listedProjects } from '@/registry';
 import Logo from '@/shared/Logo.astro';
 import BaseLayout from '@/shared/layouts/BaseLayout.astro';
+import ThemeToggle from '@/shared/ThemeToggle.astro';
 
 const projects = listedProjects;
 
@@ -18,13 +19,23 @@ const numero = (index: number) => String(index + 1).padStart(2, '0');
     <div class="grain" aria-hidden="true"></div>
 
     <header class="entete">
-      <h1 class="titre-site">
-        <span class="visually-hidden">lucagioca</span>
-        {/* Enveloppe locale : une classe scopée ici ne s'appliquerait pas à un
-            élément rendu par `Logo.astro`, qui porte sa propre portée. */}
-        <span class="marque"><Logo /></span>
-      </h1>
-      <p class="baseline">Une collection de petites expériences interactives.</p>
+      <div class="identite">
+        <h1 class="titre-site">
+          <span class="visually-hidden">lucagioca</span>
+          {/* Enveloppe locale : une classe scopée ici ne s'appliquerait pas à un
+              élément rendu par `Logo.astro`, qui porte sa propre portée. */}
+          <span class="marque"><Logo /></span>
+        </h1>
+        <p class="baseline">Une collection de petites expériences interactives.</p>
+      </div>
+
+      {/*
+        L'interrupteur ne vit que sur l'accueil pour l'instant. Sur la page d'un
+        jeu qui repeint le chrome — ton-temps le fait — il ne changerait rien à
+        l'écran : un bouton mort est pire qu'un bouton absent. Il rejoindra
+        `ProjectLayout` le jour où un projet respectera le thème du site.
+      */}
+      <ThemeToggle />
     </header>
 
     {
@@ -167,7 +178,16 @@ const numero = (index: number) => String(index + 1).padStart(2, '0');
   }
 
   .entete {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-6);
     margin-bottom: clamp(var(--space-12), 10vh, var(--space-16));
+  }
+
+  /* L'interrupteur s'aligne sur la première ligne du logo, pas sur son milieu. */
+  .entete :global(.bascule) {
+    margin-top: var(--space-1);
   }
 
   .titre-site {

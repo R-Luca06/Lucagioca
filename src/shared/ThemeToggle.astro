@@ -1,0 +1,118 @@
+---
+/**
+ * L'interrupteur crème / encre.
+ *
+ * Rendu `hidden`, puis révélé par son propre script : sans JavaScript, un
+ * bouton qui ne fait rien vaut moins que pas de bouton du tout.
+ *
+ * Il ne propose que deux états, comme demandé. Tant qu'on n'y a pas touché,
+ * c'est la préférence système qui décide — et elle continue d'être suivie en
+ * direct. Le premier clic fige le choix ; il n'y a pas de retour au « comme le
+ * système » depuis le bouton, ce serait un troisième état à expliquer.
+ */
+---
+
+<button class="bascule" type="button" hidden aria-pressed="false">
+  <span class="piste" aria-hidden="true">
+    <span class="pastille"></span>
+  </span>
+  <span class="visually-hidden">Basculer entre le mode clair et le mode sombre</span>
+</button>
+
+<script>
+  const CLE = 'lucagioca:theme';
+
+  const racine = document.documentElement;
+  const bouton = document.querySelector<HTMLButtonElement>('.bascule');
+  const etiquette = bouton?.querySelector('.visually-hidden');
+  const systeme = matchMedia('(prefers-color-scheme: dark)');
+
+  if (bouton && etiquette) {
+    /** Le thème réellement affiché : le choix figé, ou le système à défaut. */
+    const effectif = (): 'dark' | 'light' => {
+      const choisi = racine.dataset.theme;
+      if (choisi === 'dark' || choisi === 'light') return choisi;
+      return systeme.matches ? 'dark' : 'light';
+    };
+
+    const refleter = () => {
+      const theme = effectif();
+      bouton.dataset.theme = theme;
+      bouton.setAttribute('aria-pressed', String(theme === 'dark'));
+      // L'intitulé annonce la destination, pas l'état : c'est ce qu'attend
+      // quelqu'un qui entend « bouton » avant de l'activer.
+      etiquette.textContent = theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre';
+    };
+
+    bouton.hidden = false;
+    refleter();
+
+    bouton.addEventListener('click', () => {
+      const suivant = effectif() === 'dark' ? 'light' : 'dark';
+      racine.dataset.theme = suivant;
+      try {
+        localStorage.setItem(CLE, suivant);
+      } catch {
+        /* Navigation privée : le thème tient pour la visite, pas au-delà. */
+      }
+      refleter();
+    });
+
+    // Tant qu'aucun choix n'est figé, un changement de réglage système se voit.
+    systeme.addEventListener('change', () => {
+      if (!racine.dataset.theme) refleter();
+    });
+  }
+</script>
+
+<style>
+  .bascule {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-2);
+    margin: calc(var(--space-2) * -1);
+    background: none;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    color: inherit;
+  }
+  .bascule[hidden] {
+    display: none;
+  }
+
+  .piste {
+    display: block;
+    position: relative;
+    width: 2.25rem;
+    height: 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    transition:
+      border-color var(--transition),
+      background-color var(--transition);
+  }
+  .bascule:hover .piste {
+    border-color: color-mix(in srgb, var(--ink) 35%, var(--paper));
+  }
+
+  /*
+   * La pastille, encore : le même cercle que le « o » du logo et que les puces
+   * du sommaire. C'est ce qui fait de l'interrupteur un objet du site plutôt
+   * qu'un composant emprunté.
+   */
+  .pastille {
+    position: absolute;
+    top: 50%;
+    left: 0.1875rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    margin-top: -0.375rem;
+    border-radius: 50%;
+    background: var(--red);
+    transition: transform var(--transition);
+  }
+  .bascule[data-theme='dark'] .pastille {
+    transform: translateX(1rem);
+  }
+</style>
